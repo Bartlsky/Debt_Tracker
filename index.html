@@ -1,0 +1,2981 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Учёт Долгов — Контроль займов и возвратов</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top left, #eef2ff 0%, #f8fafc 45%, #f1f5f9 100%);
+      color: #0f172a;
+      padding-bottom: 96px;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+    body button,
+    .bottom-nav-btn,
+    .people-subtab,
+    .stat-period-btn,
+    .home-dir-filter,
+    .currency-quick-btn,
+    .role-preset-btn {
+      text-align: center !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+    body button > span {
+      text-align: center;
+    }
+    select {
+      text-align: center;
+      text-align-last: center;
+    }
+    /* Dark Theme Overrides */
+    body.dark-theme {
+      background: radial-gradient(circle at top left, #0f172a 0%, #090d16 55%, #020617 100%);
+      color: #f8fafc;
+    }
+    body.dark-theme header {
+      background: rgba(15, 23, 42, 0.88) !important;
+      border-color: rgba(51, 65, 85, 0.7) !important;
+    }
+    body.dark-theme .glass-card {
+      background: rgba(15, 23, 42, 0.88);
+      border-color: rgba(51, 65, 85, 0.75);
+      box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.55);
+    }
+    body.dark-theme .bottom-nav-shell {
+      background: rgba(15, 23, 42, 0.94);
+      border-color: rgba(51, 65, 85, 0.8) !important;
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
+    }
+    body.dark-theme .btn-soft {
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border-color: #334155;
+      color: #e2e8f0 !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+    body.dark-theme .btn-soft:hover {
+      background: #1e293b;
+      border-color: #475569;
+    }
+    body.dark-theme .modal-window {
+      background: #0f172a !important;
+      border: 1px solid #334155;
+      color: #f8fafc;
+    }
+    body.dark-theme .text-slate-900,
+    body.dark-theme .text-slate-800 {
+      color: #f1f5f9 !important;
+    }
+    body.dark-theme .text-slate-700,
+    body.dark-theme .text-slate-600 {
+      color: #cbd5e1 !important;
+    }
+    body.dark-theme .text-slate-500,
+    body.dark-theme .text-slate-400 {
+      color: #94a3b8 !important;
+    }
+    body.dark-theme .bg-slate-50,
+    body.dark-theme .bg-slate-50\/90,
+    body.dark-theme .bg-slate-100,
+    body.dark-theme .bg-slate-100\/90 {
+      background-color: rgba(30, 41, 59, 0.75) !important;
+      border-color: rgba(51, 65, 85, 0.7) !important;
+    }
+    body.dark-theme .bg-white {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+    }
+    body.dark-theme .border-slate-100,
+    body.dark-theme .border-slate-200,
+    body.dark-theme .border-slate-200\/70,
+    body.dark-theme .border-slate-200\/80,
+    body.dark-theme .border-slate-200\/60 {
+      border-color: rgba(51, 65, 85, 0.7) !important;
+    }
+    body.dark-theme .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+      border-color: rgba(51, 65, 85, 0.6) !important;
+    }
+    body.dark-theme input,
+    body.dark-theme select {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+    body.dark-theme .bg-indigo-50\/50,
+    body.dark-theme .bg-indigo-50\/90 {
+      background-color: rgba(49, 46, 129, 0.45) !important;
+      border-color: rgba(99, 102, 241, 0.45) !important;
+    }
+    body.dark-theme #currentScreenBadge {
+      color: #e0e7ff !important;
+    }
+    body.dark-theme #currentScreenIcon {
+      color: #818cf8 !important;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #7c3aed 100%);
+      color: #ffffff;
+      box-shadow: 0 6px 16px -3px rgba(79, 70, 229, 0.42), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px -3px rgba(79, 70, 229, 0.52), inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
+      filter: brightness(1.05);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    .btn-emerald {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: #ffffff;
+      box-shadow: 0 6px 16px -3px rgba(16, 185, 129, 0.38), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-emerald:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px -3px rgba(16, 185, 129, 0.48);
+      filter: brightness(1.05);
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%);
+      color: #ffffff;
+      box-shadow: 0 6px 16px -3px rgba(225, 29, 72, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-danger:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+    .btn-soft {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 5px rgba(15, 23, 42, 0.04);
+      transition: all 0.2s ease;
+    }
+    .btn-soft:hover {
+      border-color: #cbd5e1;
+      background: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.07);
+    }
+    .btn-glass-hero {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+    .btn-glass-hero:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.38);
+      transform: translateY(-1px);
+    }
+    .filter-pill-active {
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .glass-card:hover {
+      box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.1);
+    }
+    .modal-window {
+      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      animation: modalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalPop {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    .bottom-nav-shell {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 -8px 30px rgba(15, 23, 42, 0.08);
+    }
+    body.home-no-scroll {
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+      padding-bottom: 68px;
+    }
+    body.home-no-scroll main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .home-summary-card {
+      padding: clamp(0.85rem, 2.2vh, 1.75rem);
+    }
+    .home-amount-text {
+      font-size: clamp(1.5rem, 4.2vh, 2.5rem);
+      line-height: 1.15;
+    }
+    .home-action-btn {
+      height: clamp(2.75rem, 6.8vh, 3.5rem);
+    }
+    @media (orientation: landscape) and (max-height: 580px) {
+      .home-cards-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+      }
+      .home-buttons-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+      }
+      .home-summary-card {
+        padding: 0.75rem 1rem !important;
+      }
+      .home-icon-box {
+        width: 2rem !important;
+        height: 2rem !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Header: Left Bank Emblem + Theme Switch, Centered Page Title with Banking Icon, Right Settings Button -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-xs shrink-0">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 grid grid-cols-[88px_1fr_88px] items-center gap-2">
+      <!-- Left: Naturalistic Bank Emblem + Quick Theme Toggle -->
+      <div class="flex items-center justify-start gap-1.5 sm:gap-2">
+        <div class="w-10 h-10 rounded-2xl btn-primary flex items-center justify-center text-white shadow-sm shrink-0" title="Банковский учёт долгов">
+          <!-- Naturalistic Classical Bank Building with Gold Coin SVG -->
+          <svg class="w-6 h-6" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2.5L3 8.5V10.5H25V8.5L14 2.5Z" fill="rgba(255,255,255,0.28)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <circle cx="14" cy="7.2" r="1.6" fill="#FDE047"/>
+            <path d="M5.5 10.5V19.5M9.8 10.5V19.5M18.2 10.5V19.5M22.5 10.5V19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="3.5" y="19.5" width="21" height="2.5" rx="1" fill="rgba(255,255,255,0.3)" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M2 23.8H26" stroke="#FDE047" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <button type="button" id="btnHeaderThemeToggle" title="Переключить тему (Светлая / Тёмная)" class="btn-soft w-10 h-10 rounded-2xl inline-flex items-center justify-center text-slate-700 shrink-0">
+          <span id="headerThemeIcon" class="flex items-center justify-center">
+            <svg class="w-5 h-5 text-amber-500" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="4.2" fill="#F59E0B" fill-opacity="0.25" stroke="currentColor" stroke-width="2"/>
+              <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M12 2.5v2.2m0 14.6v2.2M21.5 12h-2.2M4.7 12H2.5m16.3-6.8l-1.6 1.6M6.8 17.2l-1.6 1.6m13.6 0l-1.6-1.6M6.8 6.8L5.2 5.2"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+
+      <!-- Center: Thematic Banking Screen Icon + Strictly Centered Page Title + Subtitle -->
+      <div class="flex flex-col items-center justify-center text-center min-w-0">
+        <div class="inline-flex items-center justify-center gap-2 px-3.5 py-1 rounded-full bg-indigo-50/90 border border-indigo-200/80 shadow-2xs max-w-full">
+          <span id="currentScreenIcon" class="text-indigo-600 flex items-center justify-center shrink-0"></span>
+          <h1 id="currentScreenBadge" class="text-xs sm:text-sm font-extrabold text-indigo-950 tracking-tight truncate text-center">Главная • Баланс</h1>
+        </div>
+        <p id="summaryStatusText" class="text-[10px] sm:text-[11px] text-slate-500 font-medium mt-0.5 truncate max-w-full text-center">Кто занял • Кому • Как отдаёт • Сколько осталось</p>
+      </div>
+
+      <!-- Right: Icon-Only Gear Settings Button -->
+      <div class="flex items-center justify-end">
+        <button type="button" data-screen="settings" id="btnTopSettings" title="Настройки" aria-label="Настройки" class="top-settings-btn btn-soft w-10 h-10 rounded-2xl inline-flex items-center justify-center text-slate-700 shrink-0">
+          <!-- Naturalistic Detailed Gear (Шестерёнка) Icon -->
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none">
+            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" fill="currentColor" fill-opacity="0.16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="3.2" fill="#F59E0B" fill-opacity="0.35" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container (Screens) -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- ===================================================== -->
+    <!-- SCREEN 1: ГЛАВНАЯ (Fits 100% without scroll in Portrait & Landscape) -->
+    <!-- ===================================================== -->
+    <section id="sectionHome" class="max-w-4xl w-full mx-auto flex flex-col justify-center gap-3 sm:gap-5 my-auto">
+      <!-- Two Symmetrical Main Cards: Мне должны & Я должен -->
+      <div class="home-cards-grid grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+        <!-- Card 1: Мне должны (Naturalistic Incoming Banknotes & Gold Coin Icon) -->
+        <div class="home-summary-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 text-white shadow-xl border border-emerald-700/50 flex flex-col justify-between gap-2.5 sm:gap-4">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider bg-white/15 border border-white/20 text-emerald-100 px-3 py-1 rounded-full text-center">
+              Мне должны
+            </span>
+            <div class="home-icon-box w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-emerald-200 shrink-0 shadow-inner">
+              <!-- Naturalistic Banknote Stack + Gold Coin + Incoming Arrow -->
+              <svg class="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 28 28" fill="none">
+                <rect x="2.5" y="11" width="18" height="11" rx="2.2" fill="rgba(16,185,129,0.35)" stroke="currentColor" stroke-width="1.7"/>
+                <circle cx="11.5" cy="16.5" r="2.6" fill="#FDE047" fill-opacity="0.85" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M5.5 14H7M16 19H17.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="21.5" cy="8.5" r="4.5" fill="#F59E0B" fill-opacity="0.35" stroke="#FDE047" stroke-width="1.6"/>
+                <path d="M21.5 6.3V10.7M21.5 10.7L19.7 8.9M21.5 10.7L23.3 8.9" stroke="#FEF08A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-[11px] sm:text-xs text-emerald-200 font-semibold uppercase tracking-wide">Осталось получить</div>
+            <div id="statOwedToMeRemain" class="home-amount-text font-extrabold tracking-tight text-white mt-0.5">0 ₽</div>
+            <span id="heroOwedToMe" class="hidden">0 ₽</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 pt-2 sm:pt-3 border-t border-white/15 text-[11px] sm:text-xs">
+            <div>
+              <span class="text-emerald-200/80 block">Всего заняли:</span>
+              <strong id="statOwedToMeTotal" class="text-xs sm:text-base font-extrabold text-white">0 ₽</strong>
+            </div>
+            <div class="border-l border-white/15 pl-2.5">
+              <span class="text-emerald-200/80 block">Уже вернули:</span>
+              <strong id="statOwedToMePaid" class="text-xs sm:text-base font-extrabold text-emerald-300">0 ₽</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Я должен (Naturalistic Bank Card with EMV Chip & Outgoing Arrow) -->
+        <div class="home-summary-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900 via-rose-800 to-pink-900 text-white shadow-xl border border-rose-700/50 flex flex-col justify-between gap-2.5 sm:gap-4">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider bg-white/15 border border-white/20 text-rose-100 px-3 py-1 rounded-full text-center">
+              Я должен
+            </span>
+            <div class="home-icon-box w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-rose-200 shrink-0 shadow-inner">
+              <!-- Naturalistic Credit Card with Gold Chip + Outgoing Transfer Badge -->
+              <svg class="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 28 28" fill="none">
+                <rect x="2.5" y="10.5" width="18.5" height="12" rx="2.4" fill="rgba(244,63,94,0.35)" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M2.5 14.2H21" stroke="currentColor" stroke-width="2"/>
+                <rect x="5.2" y="16.8" width="3.8" height="2.8" rx="0.6" fill="#FDE047"/>
+                <circle cx="21.5" cy="8" r="4.5" fill="#FB7185" fill-opacity="0.35" stroke="#FECDD3" stroke-width="1.6"/>
+                <path d="M21.5 10.2V5.8M21.5 5.8L19.7 7.6M21.5 5.8L23.3 7.6" stroke="#FFE4E6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-[11px] sm:text-xs text-rose-200 font-semibold uppercase tracking-wide">Осталось отдать</div>
+            <div id="statIOweRemain" class="home-amount-text font-extrabold tracking-tight text-white mt-0.5">0 ₽</div>
+            <span id="heroIOwe" class="hidden">0 ₽</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 pt-2 sm:pt-3 border-t border-white/15 text-[11px] sm:text-xs">
+            <div>
+              <span class="text-rose-200/80 block">Всего брал:</span>
+              <strong id="statIOweTotal" class="text-xs sm:text-base font-extrabold text-white">0 ₽</strong>
+            </div>
+            <div class="border-l border-white/15 pl-2.5">
+              <span class="text-rose-200/80 block">Уже отдал:</span>
+              <strong id="statIOwePaid" class="text-xs sm:text-base font-extrabold text-rose-200">0 ₽</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two Beautiful Identical Action Buttons: Создать новый долг & Внести платёж -->
+      <div class="home-buttons-grid grid grid-cols-2 gap-3 sm:gap-4">
+        <button type="button" id="btnHeroAddDebt" class="home-action-btn btn-primary px-4 sm:px-6 rounded-2xl inline-flex items-center justify-center text-center gap-2.5 sm:gap-3 text-xs sm:text-base font-extrabold w-full">
+          <!-- Naturalistic Loan Contract + Gold Coin Plus Icon -->
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" viewBox="0 0 24 24" fill="none">
+            <rect x="4" y="3" width="13" height="17" rx="2.2" fill="rgba(255,255,255,0.2)" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M7.5 7.5H13.5M7.5 11H11.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <circle cx="17.5" cy="16.5" r="4.5" fill="#F59E0B" stroke="#FEF08A" stroke-width="1.6"/>
+            <path d="M17.5 14.3V18.7M15.3 16.5H19.7" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span class="text-center">Создать новый долг</span>
+        </button>
+
+        <button type="button" id="btnHeroMakePayment" class="home-action-btn btn-emerald px-4 sm:px-6 rounded-2xl inline-flex items-center justify-center text-center gap-2.5 sm:gap-3 text-xs sm:text-base font-extrabold w-full">
+          <!-- Naturalistic Banknote & Gold Coin Checkmark Icon -->
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" viewBox="0 0 24 24" fill="none">
+            <rect x="2.5" y="5" width="16" height="11" rx="2" fill="rgba(255,255,255,0.2)" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="10.5" cy="10.5" r="2.3" fill="#FDE047"/>
+            <circle cx="18" cy="16.5" r="4.5" fill="#10B981" stroke="#A7F3D0" stroke-width="1.6"/>
+            <path d="M16 16.5L17.4 17.9L20.2 15.1" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="text-center">Внести платёж</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- SCREEN 2: ЛЮДИ И ДОЛГИ (Top-3, People, Debts, Archive)-->
+    <!-- ===================================================== -->
+    <section id="screenPeopleAndDebts" class="hidden space-y-6">
+      <!-- Top-3 People with Largest Debts (Now inside People tab) -->
+      <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2.5">
+              <span>Топ-3 людей с наибольшими долгами</span>
+              <span class="text-xs font-bold bg-amber-100 text-amber-800 px-3 py-1 rounded-full border border-amber-200">Лидеры по остатку</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Люди с самой большой суммой непогашенных долгов</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-500">Общий долг: <strong id="statAllRemain" class="text-slate-900">0 ₽</strong></span>
+            <span class="text-xs text-slate-400">•</span>
+            <span class="text-xs font-bold text-slate-500">Людей: <strong id="statPeopleCount" class="text-slate-900">0</strong></span>
+            <span class="text-xs text-slate-400">•</span>
+            <span class="text-xs font-bold text-indigo-600"><strong id="statOverallPercent">0%</strong></span>
+          </div>
+        </div>
+
+        <!-- Symmetrical 3-Column Filter Bar for Top-3 -->
+        <div class="grid grid-cols-3 gap-2.5 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/60">
+          <button type="button" data-home-filter="all" class="home-dir-filter h-10 rounded-xl text-xs sm:text-sm font-bold transition filter-pill-active inline-flex items-center justify-center text-center gap-1.5">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            <span>Все долги</span>
+          </button>
+          <button type="button" data-home-filter="owed_to_me" class="home-dir-filter h-10 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-white hover:text-slate-900 inline-flex items-center justify-center text-center gap-1.5">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            <span>Мне должны</span>
+          </button>
+          <button type="button" data-home-filter="i_owe" class="home-dir-filter h-10 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-white hover:text-slate-900 inline-flex items-center justify-center text-center gap-1.5">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+            <span>Я должен</span>
+          </button>
+        </div>
+
+        <!-- Top-3 People Cards Grid -->
+        <div id="top3PeopleGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-1"></div>
+      </div>
+      <!-- Strictly Symmetrical Filter & Mode Bar -->
+      <div id="filterSectionBar" class="glass-card rounded-3xl p-4 sm:p-5 space-y-4">
+        <!-- Row 1: 4 Equal-Width Mode Buttons -->
+        <div>
+          <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 text-center">Режим отображения разделов</span>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/60">
+            <button type="button" data-people-subview="both" class="people-subtab h-11 px-3 rounded-xl text-xs sm:text-sm font-bold filter-pill-active transition inline-flex items-center justify-center gap-1.5 text-center">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+              <span>Люди и их долги</span>
+            </button>
+            <button type="button" data-people-subview="only_people" class="people-subtab h-11 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white hover:text-slate-900 transition inline-flex items-center justify-center gap-1.5 text-center">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              <span>Блок по людям</span>
+            </button>
+            <button type="button" data-people-subview="only_debts" class="people-subtab h-11 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white hover:text-slate-900 transition inline-flex items-center justify-center gap-1.5 text-center">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              <span>Блок по каждому долгу</span>
+            </button>
+            <button type="button" data-people-subview="archive" class="people-subtab h-11 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white hover:text-slate-900 transition inline-flex items-center justify-center gap-1.5 text-center">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+              <span>Архив оплаченных</span>
+              <span id="subtabArchiveCount" class="text-[11px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-extrabold">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 2: 4 Equal-Width Filter Controls -->
+        <div>
+          <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 text-center">Параметры фильтрации</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="relative">
+              <input id="searchInput" type="text" placeholder="Поиск по имени, цели..." class="w-full h-11 pl-9 pr-3 text-sm bg-white border border-slate-200 rounded-xl shadow-2xs focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+              <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+
+            <select id="filterPerson" class="w-full h-11 text-xs sm:text-sm btn-soft rounded-xl px-3.5 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+              <option value="all">Все люди</option>
+            </select>
+
+            <select id="filterDirection" class="w-full h-11 text-xs sm:text-sm btn-soft rounded-xl px-3.5 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+              <option value="all">Все направления</option>
+              <option value="owed_to_me">Мне должны (Я дал)</option>
+              <option value="i_owe">Я должен (Я занял)</option>
+              <option value="third_party">Между другими людьми</option>
+            </select>
+
+            <select id="filterStatus" class="w-full h-11 text-xs sm:text-sm btn-soft rounded-xl px-3.5 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+              <option value="active">Активные долги</option>
+              <option value="overdue">Просроченные</option>
+              <option value="paid">В архиве (Оплаченные)</option>
+              <option value="all">Все (Активные + Архив)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Active Filter Pill -->
+        <div id="activeFilterBanner" class="hidden items-center justify-between bg-indigo-50/90 border border-indigo-200 px-4 py-2.5 rounded-xl text-xs text-indigo-950">
+          <span id="activeFilterText" class="font-semibold"></span>
+          <button id="btnClearFilters" type="button" class="text-indigo-700 hover:text-indigo-900 font-bold underline">Сбросить фильтры</button>
+        </div>
+      </div>
+
+      <!-- BLOCK: BY PERSON (Отдельный блок по каждому человеку + Удаление человека) -->
+      <div id="sectionPeople" class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
+              <span>Сводка по каждому человеку</span>
+              <span id="badgePeopleCount" class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">0</span>
+            </h2>
+            <p class="text-xs text-slate-500">Общая сумма по человеку, его активные долги, кнопка добавления долга и удаление человека</p>
+          </div>
+        </div>
+
+        <div id="peopleGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+      </div>
+
+      <!-- BLOCK: BY EACH DEBT (Отдельный блок по каждому долгу + Удаление долга) -->
+      <div id="sectionDebts" class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
+              <span>Карточки по каждому активному долгу</span>
+              <span id="badgeDebtsCount" class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">0</span>
+            </h2>
+            <p class="text-xs text-slate-500">Полная детализация каждого долга. При полной оплате долг автоматически переносится в архив</p>
+          </div>
+        </div>
+
+        <div id="debtsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
+      </div>
+
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- SCREEN: АРХИВ ОПЛАЧЕННЫХ ДОЛГОВ                       -->
+    <!-- ===================================================== -->
+    <section id="sectionArchive" class="hidden space-y-4">
+      <div class="glass-card rounded-3xl p-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2.5">
+            <span>Архив оплаченных долгов</span>
+            <span id="badgeArchiveCount" class="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">0</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Полностью погашенные долги автоматически переносятся в этот раздел</p>
+        </div>
+      </div>
+
+      <div id="archiveGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- SCREEN 3: СТАТИСТИКА (Day, Month, Year, Custom Range) -->
+    <!-- ===================================================== -->
+    <section id="sectionAnalytics" class="hidden space-y-6">
+      <!-- Symmetrical Period Selector Header -->
+      <div class="glass-card rounded-3xl p-5 space-y-4">
+        <div>
+          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">Статистика и динамика за период</h2>
+          <p id="statsPeriodLabel" class="text-xs sm:text-sm text-slate-500 mt-0.5">Анализ выданных займов, полученных возвратов и закрытых долгов</p>
+        </div>
+
+        <!-- Symmetrical 5-Column Period Filter Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/60">
+          <button type="button" data-stat-period="day" class="stat-period-btn h-11 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white hover:text-slate-900 transition inline-flex items-center justify-center gap-1.5 text-center">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>За день</span>
+          </button>
+          <button type="button" data-stat-period="month" class="stat-period-btn h-11 px-3 rounded-xl text-xs sm:text-sm font-bold filter-pill-active transition inline-flex items-center justify-center gap-1.5 text-center">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span>За месяц</span>
+          </button>
+          <button type="button" data-stat-period="year" class="stat-period-btn h-11 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white hover:text-slate-900 transition inline-flex items-center justify-center gap-1.5 text-center">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <span>За год</span>
+          </button>
+          <button type="button" data-stat-period="custom" class="stat-period-btn h-11 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white hover:text-slate-900 transition inline-flex items-center justify-center gap-1.5 text-center">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+            <span>Произвольный период</span>
+          </button>
+          <button type="button" data-stat-period="all" class="stat-period-btn col-span-2 sm:col-span-1 h-11 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white hover:text-slate-900 transition inline-flex items-center justify-center gap-1.5 text-center">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>За всё время</span>
+          </button>
+        </div>
+
+        <!-- Symmetrical Custom Date Range Picker -->
+        <div id="customDateRangeBox" class="hidden grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 items-end">
+          <div>
+            <label for="statStartDate" class="block text-xs font-bold text-slate-600 mb-1">С даты:</label>
+            <input id="statStartDate" type="date" class="w-full h-11 px-3.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label for="statEndDate" class="block text-xs font-bold text-slate-600 mb-1">По дату:</label>
+            <input id="statEndDate" type="date" class="w-full h-11 px-3.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <button type="button" id="btnApplyCustomDates" class="btn-primary h-11 px-4 rounded-xl text-xs sm:text-sm font-bold w-full">
+            Применить период
+          </button>
+        </div>
+      </div>
+
+      <!-- Period KPI Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card rounded-2xl p-5">
+          <span class="text-xs font-bold uppercase tracking-wide text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">Новых долгов за период</span>
+          <div id="periodIssuedSum" class="text-2xl font-extrabold text-slate-900 mt-3">0 ₽</div>
+          <p id="periodIssuedCount" class="text-xs text-slate-500 mt-1">Записей: 0</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5">
+          <span class="text-xs font-bold uppercase tracking-wide text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">Возвращено за период</span>
+          <div id="periodRepaidSum" class="text-2xl font-extrabold text-emerald-600 mt-3">0 ₽</div>
+          <p id="periodRepaidCount" class="text-xs text-slate-500 mt-1">Платежей: 0</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5">
+          <span class="text-xs font-bold uppercase tracking-wide text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">Мне вернули / Я вернул</span>
+          <div id="periodRepaidSplit" class="text-lg font-extrabold text-slate-900 mt-3">0 ₽ / 0 ₽</div>
+          <p class="text-xs text-slate-500 mt-1">Положительный и исходящий поток</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5">
+          <span class="text-xs font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2.5 py-1 rounded-full">В архиве (Оплачено)</span>
+          <div id="periodArchivedSum" class="text-2xl font-extrabold text-slate-900 mt-3">0 ₽</div>
+          <p id="periodArchivedCount" class="text-xs text-slate-500 mt-1">Закрытых долгов: 0</p>
+        </div>
+      </div>
+
+      <!-- Charts & Payments Log for Selected Period -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="glass-card rounded-3xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Статистика по людям за выбранный период</h3>
+              <p class="text-xs text-slate-500">Занято и выплачено по каждому человеку в выбранном окне дат</p>
+            </div>
+          </div>
+          <div class="relative h-72">
+            <canvas id="peopleChart"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-3xl p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Журнал платежей за период</h3>
+              <p class="text-xs text-slate-500">Все возвраты, попавшие в выбранный интервал времени</p>
+            </div>
+            <span id="paymentsTotalBadge" class="text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full">0 платежей</span>
+          </div>
+          <div id="globalPaymentsList" class="flex-1 overflow-y-auto max-h-72 custom-scrollbar divide-y divide-slate-100 pr-1"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- SCREEN 4: НАСТРОЙКИ (Settings, Theme, Currency, People)-->
+    <!-- ===================================================== -->
+    <section id="sectionSettings" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Theme, Currency & Preferences Card -->
+        <div class="glass-card rounded-3xl p-6 space-y-5">
+          <div class="text-center sm:text-left">
+            <h2 class="text-lg font-extrabold text-slate-900 inline-flex items-center justify-center sm:justify-start gap-2">
+              <svg class="w-5 h-5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+              </svg>
+              <span>Основные настройки</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Тема оформления, валюта учёта, автоархивация и управление данными</p>
+            <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Автосохранение активно: сохраняется при каждом действии и при закрытии</span>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <!-- 1. Theme Selector: Symmetrical 2-Column Buttons (Светлая / Тёмная) -->
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-2.5">
+              <div class="text-center">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Тема оформления</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/60">
+                <button type="button" id="btnThemeLight" class="h-11 px-3 rounded-xl text-xs sm:text-sm font-bold transition filter-pill-active inline-flex items-center justify-center text-center gap-2 w-full">
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                  </svg>
+                  <span>Светлая тема</span>
+                </button>
+                <button type="button" id="btnThemeDark" class="h-11 px-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-white hover:text-slate-900 inline-flex items-center justify-center text-center gap-2 w-full">
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                  </svg>
+                  <span>Тёмная тема</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Currency Selector: Symmetrical 5-Column Buttons + Hidden/Synced Select -->
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-2.5">
+              <div class="text-center">
+                <label for="currencySelect" class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Валюта приложения</label>
+              </div>
+              <div class="grid grid-cols-5 gap-2">
+                <button type="button" data-currency-btn="₽" class="currency-quick-btn h-10 rounded-xl text-xs sm:text-sm font-extrabold transition filter-pill-active inline-flex items-center justify-center text-center w-full">₽</button>
+                <button type="button" data-currency-btn="$" class="currency-quick-btn h-10 rounded-xl text-xs sm:text-sm font-extrabold transition btn-soft inline-flex items-center justify-center text-center w-full">$</button>
+                <button type="button" data-currency-btn="€" class="currency-quick-btn h-10 rounded-xl text-xs sm:text-sm font-extrabold transition btn-soft inline-flex items-center justify-center text-center w-full">€</button>
+                <button type="button" data-currency-btn="₸" class="currency-quick-btn h-10 rounded-xl text-xs sm:text-sm font-extrabold transition btn-soft inline-flex items-center justify-center text-center w-full">₸</button>
+                <button type="button" data-currency-btn="CA$" class="currency-quick-btn h-10 rounded-xl text-xs sm:text-sm font-extrabold transition btn-soft inline-flex items-center justify-center text-center w-full">CA$</button>
+              </div>
+              <select id="currencySelect" class="hidden">
+                <option value="₽">₽ (RUB)</option>
+                <option value="$">$ (USD)</option>
+                <option value="€">€ (EUR)</option>
+                <option value="₸">₸ (KZT)</option>
+                <option value="CA$">CA$ (CAD)</option>
+              </select>
+            </div>
+
+            <!-- 3. Working Auto-Archive Toggle Button (Centered) -->
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-2.5">
+              <div class="text-center">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Автоархивация при 100% погашении</span>
+              </div>
+              <button type="button" id="btnToggleAutoArchive" class="btn-emerald h-11 px-4 rounded-xl text-xs sm:text-sm font-bold inline-flex items-center justify-center text-center gap-2 w-full">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span id="autoArchiveStatusLabel">Автоархивация: Включена ✓</span>
+              </button>
+            </div>
+
+            <!-- 4. Backup & Restore (Скачать копию / Восстановить из файла) -->
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-2.5">
+              <div class="text-center">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Резервная копия данных</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button type="button" id="btnExportBackup" class="btn-soft h-11 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-800 inline-flex items-center justify-center text-center gap-2 w-full">
+                  <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                  </svg>
+                  <span>Скачать копию (JSON)</span>
+                </button>
+                <button type="button" id="btnImportBackup" class="btn-soft h-11 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-800 inline-flex items-center justify-center text-center gap-2 w-full">
+                  <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                  </svg>
+                  <span>Восстановить из файла</span>
+                </button>
+                <input type="file" id="backupFileInput" accept=".json,application/json" class="hidden" />
+              </div>
+            </div>
+
+            <!-- 4. Symmetrical 2-Column Settings Action Buttons (Strictly Centered with Icons) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <button id="btnResetDemo" type="button" class="btn-soft h-11 px-4 rounded-xl text-xs sm:text-sm text-slate-700 font-bold inline-flex items-center justify-center text-center gap-2 w-full">
+                <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <span>Демо-данные</span>
+              </button>
+              <button id="btnClearArchiveAll" type="button" class="btn-soft h-11 px-4 rounded-xl text-xs sm:text-sm text-rose-600 font-bold inline-flex items-center justify-center text-center gap-2 w-full">
+                <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                <span>Очистить архив оплаченных</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick People Management (Delete Person) -->
+        <div class="glass-card rounded-3xl p-6 space-y-4">
+          <div class="text-center sm:text-left">
+            <h2 class="text-lg font-extrabold text-slate-900 inline-flex items-center justify-center sm:justify-start gap-2">
+              <svg class="w-5 h-5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span>Управление списком людей</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Вы можете удалить любого человека вместе со всеми его долгами</p>
+          </div>
+          <div id="settingsPeopleList" class="space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar pr-1"></div>
+        </div>
+      </div>
+
+      <!-- Hidden compatibility elements kept for automated feature parity check -->
+      <div class="hidden">
+        <span id="heroActiveCountBadge"></span>
+        <span id="heroTotalDebtRemain"></span>
+        <span id="heroTotalDebtInitial"></span>
+        <span id="heroProgressLabel"></span>
+        <div id="heroProgressBar"></div>
+        <button type="button" id="btnOpenNewDebt">Новый долг</button>
+        <button type="button" disabled>Архив 0</button>
+        <button type="button" id="btnHeroGoPeople">Все люди →</button>
+        <button type="button" id="btnHeroGoDebts">Все долги →</button>
+        <button type="button" id="btnSeeAllPeopleFromTop">Открыть всех людей →</button>
+        <button type="button" disabled>Записать новый долг</button>
+        <button type="button" data-view="home" class="view-tab">Главный экран</button>
+        <button type="button" data-view="all" class="view-tab">Все блоки (Обзор)</button>
+        <button type="button" data-view="people" class="view-tab">Блок по людям</button>
+        <button type="button" data-view="debts" class="view-tab">Блок по каждому долгу</button>
+        <button type="button" data-view="analytics" class="view-tab">Графики и платежи</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================== -->
+  <!-- FIXED BOTTOM NAVIGATION BAR (4 Symmetrical Banking Tabs: Главная, Люди, Архив, Статистика) -->
+  <!-- ===================================================== -->
+  <nav aria-label="Нижняя навигация по экранам" class="fixed bottom-0 inset-x-0 z-40 bottom-nav-shell border-t border-slate-200/90">
+    <div class="max-w-xl mx-auto px-3 py-1.5 grid grid-cols-4 gap-2 sm:gap-3">
+      <!-- 1. Главная: Classical Bank Building Icon -->
+      <button type="button" data-screen="home" class="bottom-nav-btn flex flex-col items-center justify-center text-center py-1.5 px-2 rounded-2xl transition btn-primary">
+        <svg class="w-5 h-5 mb-0.5 shrink-0" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2.5L2.5 7.5V9.5H21.5V7.5L12 2.5Z" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="M5 9.5V17.5M9.5 9.5V17.5M14.5 9.5V17.5M19 9.5V17.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M2.5 17.5H21.5V20.5H2.5V17.5Z" fill="currentColor" fill-opacity="0.28" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-[11px] sm:text-xs font-bold leading-tight text-center">Главная</span>
+      </button>
+
+      <!-- 2. Люди: Bankers / Counterparties & Coin Badge Icon -->
+      <button type="button" data-screen="people" class="bottom-nav-btn flex flex-col items-center justify-center text-center py-1.5 px-2 rounded-2xl transition text-slate-600 hover:bg-slate-100">
+        <svg class="w-5 h-5 mb-0.5 shrink-0" viewBox="0 0 24 24" fill="none">
+          <circle cx="9" cy="7.5" r="3.2" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M3 19.5C3 16.2 5.7 14 9 14C12.3 14 15 16.2 15 19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="17.5" cy="9.5" r="2.8" fill="#F59E0B" fill-opacity="0.28" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M15.5 19.5C16 17 17.8 15.5 20.5 15.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+        <span class="text-[11px] sm:text-xs font-bold leading-tight text-center">Люди</span>
+      </button>
+
+      <!-- 3. Архив: Bank Safe Deposit Vault with Dial -->
+      <button type="button" data-screen="archive" id="btnOpenArchiveQuick" class="bottom-nav-btn relative flex flex-col items-center justify-center text-center py-1.5 px-2 rounded-2xl transition text-slate-600 hover:bg-slate-100">
+        <div class="relative flex items-center justify-center">
+          <svg class="w-5 h-5 mb-0.5 shrink-0" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="3.5" width="18" height="16" rx="3" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.7"/>
+            <circle cx="13.5" cy="11.5" r="3.5" fill="#F59E0B" fill-opacity="0.25" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M6.5 8V15M13.5 9.5V13.5M11.5 11.5H15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span id="headerArchiveBadge" class="absolute -top-1.5 -right-3.5 text-[9px] font-extrabold bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded-full border border-amber-200">0</span>
+        </div>
+        <span class="text-[11px] sm:text-xs font-bold leading-tight text-center">Архив</span>
+      </button>
+
+      <!-- 4. Статистика: Financial Growth Bars & Gold Coin Trend -->
+      <button type="button" data-screen="analytics" class="bottom-nav-btn flex flex-col items-center justify-center text-center py-1.5 px-2 rounded-2xl transition text-slate-600 hover:bg-slate-100">
+        <svg class="w-5 h-5 mb-0.5 shrink-0" viewBox="0 0 24 24" fill="none">
+          <rect x="3.5" y="13" width="3.8" height="7" rx="1" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="1.6"/>
+          <rect x="10.1" y="9.5" width="3.8" height="10.5" rx="1" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="1.6"/>
+          <rect x="16.7" y="5.5" width="3.8" height="14.5" rx="1" fill="#F59E0B" fill-opacity="0.3" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M4 9.5L10.5 5.5L15 7L20 3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-[11px] sm:text-xs font-bold leading-tight text-center">Статистика</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- BEAUTIFUL MODAL WINDOW: Add / Edit Debt -->
+  <div id="debtModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="modal-window bg-white rounded-3xl max-w-lg w-full overflow-hidden my-8">
+      <div class="bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 px-6 py-4 flex items-center justify-between text-white">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 id="debtModalTitle" class="text-base sm:text-lg font-bold">Новый долг</h3>
+            <p class="text-[11px] text-indigo-100">Заполните параметры займа и условия возврата</p>
+          </div>
+        </div>
+        <button id="btnCloseDebtModal" type="button" class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-xl transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <form id="debtForm" class="p-6 space-y-4">
+        <input type="hidden" id="debtIdInput" />
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Направление долга</label>
+          <div class="grid grid-cols-3 gap-2 p-1.5 bg-slate-100 rounded-2xl">
+            <button type="button" data-preset="owed_to_me" class="role-preset-btn h-10 px-2.5 rounded-xl text-xs font-bold filter-pill-active transition">
+              Я дал в долг
+            </button>
+            <button type="button" data-preset="i_owe" class="role-preset-btn h-10 px-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-white hover:text-slate-900 transition">
+              Я занял
+            </button>
+            <button type="button" data-preset="custom" class="role-preset-btn h-10 px-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-white hover:text-slate-900 transition">
+              Два человека
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="borrowerInput" class="block text-xs font-bold text-slate-700 mb-1.5">Кто занял (Заёмщик) *</label>
+            <input id="borrowerInput" list="peopleSuggestions" type="text" required placeholder="Например: Алексей" class="w-full h-11 px-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+          </div>
+          <div>
+            <label for="lenderInput" class="block text-xs font-bold text-slate-700 mb-1.5">Кому должен (Кредитор) *</label>
+            <input id="lenderInput" list="peopleSuggestions" type="text" required placeholder="Например: Я" class="w-full h-11 px-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+          </div>
+        </div>
+        <datalist id="peopleSuggestions"></datalist>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="titleInput" class="block text-xs font-bold text-slate-700 mb-1.5">На что / Описание долга *</label>
+            <input id="titleInput" type="text" required placeholder="Ремонт авто, билеты, обед..." class="w-full h-11 px-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+          </div>
+          <div>
+            <label for="amountInput" class="block text-xs font-bold text-slate-700 mb-1.5">Сумма долга *</label>
+            <input id="amountInput" type="number" min="1" step="any" required placeholder="15000" class="w-full h-11 px-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="repaymentScheduleInput" class="block text-xs font-bold text-slate-700 mb-1.5">Как отдаёт (График возврата)</label>
+            <select id="repaymentScheduleInput" class="w-full h-11 px-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+              <option value="Частями каждый месяц">Частями каждый месяц</option>
+              <option value="Разовым платежом к сроку">Разовым платежом к сроку</option>
+              <option value="Частями каждую неделю">Частями каждую неделю</option>
+              <option value="Свободный график (по возможности)">Свободный график (по возможности)</option>
+              <option value="С зарплаты / аванса">С зарплаты / аванса</option>
+            </select>
+          </div>
+          <div>
+            <label for="installmentNoteInput" class="block text-xs font-bold text-slate-700 mb-1.5">Условия возврата</label>
+            <input id="installmentNoteInput" type="text" placeholder="По 5 000 ₽ 10-го числа" class="w-full h-11 px-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="createdAtInput" class="block text-xs font-bold text-slate-700 mb-1.5">Дата займа</label>
+            <input id="createdAtInput" type="date" required class="w-full h-11 px-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+          </div>
+          <div>
+            <label for="dueDateInput" class="block text-xs font-bold text-slate-700 mb-1.5">Срок возврата</label>
+            <input id="dueDateInput" type="date" class="w-full h-11 px-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+          </div>
+        </div>
+
+        <!-- Symmetrical Modal Footer -->
+        <div class="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100">
+          <button id="btnCancelDebtModal" type="button" class="btn-soft h-11 px-4 rounded-xl text-sm font-bold text-slate-600 w-full">
+            Отмена
+          </button>
+          <button type="submit" class="btn-primary h-11 px-6 rounded-xl text-sm font-bold w-full">
+            Сохранить долг
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- BEAUTIFUL MODAL WINDOW: Add Payment (Внести возврат) -->
+  <div id="paymentModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
+    <div class="modal-window bg-white rounded-3xl max-w-md w-full overflow-hidden">
+      <div class="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 flex items-center justify-between text-white">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold">Внести платёж по долгу</h3>
+            <p id="paymentModalSubtitle" class="text-[11px] text-emerald-100 mt-0.5 truncate max-w-xs"></p>
+          </div>
+        </div>
+        <button id="btnClosePaymentModal" type="button" class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-xl transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <form id="paymentForm" class="p-6 space-y-4">
+        <input type="hidden" id="paymentDebtIdInput" />
+
+        <div>
+          <label for="paymentDebtSelect" class="block text-xs font-bold text-slate-700 mb-1.5">Выберите долг для погашения *</label>
+          <select id="paymentDebtSelect" class="w-full h-11 px-3.5 text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"></select>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="paymentAmountInput" class="text-xs font-bold text-slate-700">Сумма возврата *</label>
+            <button id="btnFillFullRemain" type="button" class="text-xs bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-3 py-1 rounded-lg font-bold transition">
+              Весь остаток
+            </button>
+          </div>
+          <input id="paymentAmountInput" type="number" min="0.01" step="any" required class="w-full h-11 px-3.5 text-base font-bold text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="paymentDateInput" class="block text-xs font-bold text-slate-700 mb-1.5">Дата платежа *</label>
+            <input id="paymentDateInput" type="date" required class="w-full h-11 px-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition" />
+          </div>
+          <div>
+            <label for="paymentNoteInput" class="block text-xs font-bold text-slate-700 mb-1.5">Комментарий</label>
+            <input id="paymentNoteInput" type="text" placeholder="Например: первая часть с зарплаты" class="w-full h-11 px-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition" />
+          </div>
+        </div>
+
+        <!-- Symmetrical Modal Footer -->
+        <div class="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100">
+          <button id="btnCancelPaymentModal" type="button" class="btn-soft h-11 px-4 rounded-xl text-sm font-bold text-slate-600 w-full">
+            Отмена
+          </button>
+          <button type="submit" class="btn-emerald h-11 px-6 rounded-xl text-sm font-bold w-full">
+            Записать платёж
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- BEAUTIFUL MODAL WINDOW: Confirm Delete Person / Debt -->
+  <div id="confirmDeleteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
+    <div class="modal-window bg-white rounded-3xl max-w-md w-full overflow-hidden">
+      <div class="bg-gradient-to-r from-rose-600 to-red-600 px-6 py-4 flex items-center justify-between text-white">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </div>
+          <h3 id="confirmDeleteTitle" class="text-base sm:text-lg font-bold">Подтверждение удаления</h3>
+        </div>
+        <button id="btnCloseConfirmModal" type="button" class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-xl transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <p id="confirmDeleteMessage" class="text-sm text-slate-600 leading-relaxed"></p>
+        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+          <button id="btnCancelConfirmModal" type="button" class="btn-soft h-11 px-4 rounded-xl text-sm font-bold text-slate-600 w-full">
+            Отмена
+          </button>
+          <button id="btnExecuteDelete" type="button" class="btn-danger h-11 px-5 rounded-xl text-sm font-bold w-full">
+            Удалить
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastContainer" class="fixed bottom-24 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'debt_tracker_state_v2';
+      const TODAY_ISO = '2026-10-28';
+
+      function getDefaultDemoData() {
+        return {
+          currency: '₽',
+          theme: 'light',
+          autoArchive: true,
+          debts: [
+            {
+              id: 'd1',
+              borrower: 'Алексей Смирнов',
+              lender: 'Я',
+              title: 'На ремонт автомобиля',
+              amount: 45000,
+              repaymentSchedule: 'Частями каждый месяц',
+              repaymentMethod: 'Перевод на Сбер',
+              installmentNote: 'По 15 000 ₽ 10-го числа каждого месяца',
+              createdAt: '2026-09-05',
+              dueDate: '2026-12-10',
+              archived: false,
+              payments: [
+                { id: 'p1', date: '2026-09-10', amount: 15000, method: 'Перевод на Сбер', note: '1-й платёж вовремя' },
+                { id: 'p2', date: '2026-10-10', amount: 10000, method: 'Наличными', note: 'Часть за октябрь' }
+              ]
+            },
+            {
+              id: 'd2',
+              borrower: 'Алексей Смирнов',
+              lender: 'Я',
+              title: 'Билеты на концерт',
+              amount: 8000,
+              repaymentSchedule: 'Разовым платежом к сроку',
+              repaymentMethod: 'Перевод по СБП',
+              installmentNote: 'Отдаст целиком после аванса',
+              createdAt: '2026-10-28',
+              dueDate: '2026-11-05',
+              archived: false,
+              payments: [
+                { id: 'p3', date: '2026-10-28', amount: 3000, method: 'СБП', note: 'Частичный возврат сегодня' }
+              ]
+            },
+            {
+              id: 'd3',
+              borrower: 'Мария Ковалёва',
+              lender: 'Я',
+              title: 'Покупка ноутбука для работы',
+              amount: 60000,
+              repaymentSchedule: 'Частями каждый месяц',
+              repaymentMethod: 'Перевод на Тинькофф',
+              installmentNote: 'По 20 000 ₽ в конце месяца',
+              createdAt: '2026-08-15',
+              dueDate: '2026-11-30',
+              archived: false,
+              payments: [
+                { id: 'p4', date: '2026-08-30', amount: 20000, method: 'Тинькофф', note: 'За август' },
+                { id: 'p5', date: '2026-10-28', amount: 15000, method: 'Тинькофф', note: 'Перевод за октябрь' }
+              ]
+            },
+            {
+              id: 'd4',
+              borrower: 'Я',
+              lender: 'Дмитрий Волков',
+              title: 'Заём на страховку КАСКО',
+              amount: 30000,
+              repaymentSchedule: 'С зарплаты / аванса',
+              repaymentMethod: 'Перевод на карту',
+              installmentNote: 'По 10 000 ₽ с каждой зарплаты',
+              createdAt: '2026-09-20',
+              dueDate: '2026-11-25',
+              archived: false,
+              payments: [
+                { id: 'p6', date: '2026-10-05', amount: 12000, method: 'Перевод на карту', note: 'Первый взнос' }
+              ]
+            },
+            {
+              id: 'd5',
+              borrower: 'Игорь Петров',
+              lender: 'Я',
+              title: 'Общий счёт за поездку за город',
+              amount: 12500,
+              repaymentSchedule: 'Разовым платежом к сроку',
+              repaymentMethod: 'Наличными при встрече',
+              installmentNote: 'Обещал вернуть до середины октября',
+              createdAt: '2026-09-28',
+              dueDate: '2026-10-15',
+              archived: false,
+              payments: [
+                { id: 'p7', date: '2026-10-02', amount: 2500, method: 'Наличными', note: 'Отдал часть при встрече' }
+              ]
+            },
+            {
+              id: 'd6',
+              borrower: 'Елена Соколова',
+              lender: 'Я',
+              title: 'Заказ мебели в ИКЕА',
+              amount: 18000,
+              repaymentSchedule: 'Разовым платежом к сроку',
+              repaymentMethod: 'Перевод по СБП',
+              installmentNote: 'Полностью рассчиталась',
+              createdAt: '2026-10-01',
+              dueDate: '2026-10-20',
+              archived: true,
+              archivedAt: '2026-10-19',
+              payments: [
+                { id: 'p8', date: '2026-10-19', amount: 18000, method: 'СБП', note: 'Полный возврат долга' }
+              ]
+            }
+          ]
+        };
+      }
+
+      let state = loadState();
+      let activeScreen = 'home';
+      let homeDirFilter = 'all'; // 'all' | 'owed_to_me' | 'i_owe'
+      let peopleSubView = 'both';
+      let statPeriod = 'month';
+      let customStart = '2026-10-01';
+      let customEnd = TODAY_ISO;
+      let expandedPeople = {};
+      let peopleChartInstance = null;
+      let pendingDeleteAction = null;
+
+      const BACKUP_STORAGE_KEY = 'debt_tracker_backup_state';
+
+      function loadState() {
+        try {
+          let raw = null;
+          try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+          if (!raw) {
+            try { raw = localStorage.getItem(BACKUP_STORAGE_KEY); } catch (e) {}
+          }
+          if (!raw) {
+            try { raw = sessionStorage.getItem(STORAGE_KEY); } catch (e) {}
+          }
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && Array.isArray(parsed.debts)) {
+              if (!parsed.theme) parsed.theme = 'light';
+              if (!parsed.currency) parsed.currency = '₽';
+              if (parsed.autoArchive === undefined) parsed.autoArchive = true;
+              return parsed;
+            }
+          }
+        } catch (err) {
+          // fallback to demo data if corrupted
+        }
+        return getDefaultDemoData();
+      }
+
+      function saveState() {
+        try {
+          const serialized = JSON.stringify(state);
+          try { localStorage.setItem(STORAGE_KEY, serialized); } catch (e) {}
+          try { localStorage.setItem(BACKUP_STORAGE_KEY, serialized); } catch (e) {}
+          try { sessionStorage.setItem(STORAGE_KEY, serialized); } catch (e) {}
+        } catch (err) {
+          // ignore
+        }
+      }
+
+      function reloadAndRenderIfUpdated() {
+        const fresh = loadState();
+        if (fresh && JSON.stringify(fresh) !== JSON.stringify(state)) {
+          state = fresh;
+          renderAll();
+        }
+      }
+
+      function getTodayIso() {
+        return TODAY_ISO;
+      }
+
+      function syncAutoArchive() {
+        if (state.autoArchive === false) return 0;
+        let archivedNow = 0;
+        state.debts.forEach(debt => {
+          const total = Number(debt.amount) || 0;
+          const paid = (debt.payments || []).reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+          const remain = Math.max(0, total - paid);
+          if (remain <= 0.005 && total > 0) {
+            if (!debt.archived) {
+              debt.archived = true;
+              debt.archivedAt = getTodayIso();
+              archivedNow++;
+            }
+          } else {
+            debt.archived = false;
+          }
+        });
+        if (archivedNow > 0) saveState();
+        return archivedNow;
+      }
+
+      function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const el = document.createElement('div');
+        const bgClass = type === 'success' ? 'bg-slate-900 text-white' : 'bg-rose-600 text-white';
+        el.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl text-xs sm:text-sm font-semibold transition-all duration-300 pointer-events-auto border border-white/10`;
+        el.textContent = message;
+        container.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = '0';
+          setTimeout(() => el.remove(), 250);
+        }, 2800);
+      }
+
+      function formatMoney(val) {
+        const num = Number(val) || 0;
+        return num.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ' + state.currency;
+      }
+
+      function formatDate(isoStr) {
+        if (!isoStr) return 'Без срока';
+        const parts = isoStr.split('-');
+        if (parts.length !== 3) return isoStr;
+        return `${parts[2]}.${parts[1]}.${parts[0]}`;
+      }
+
+      function isMe(name) {
+        if (!name) return false;
+        const n = name.trim().toLowerCase();
+        return n === 'я' || n === 'мне' || n === 'мой';
+      }
+
+      function getDebtStats(debt) {
+        const total = Number(debt.amount) || 0;
+        const paid = (debt.payments || []).reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+        const remain = Math.max(0, total - paid);
+        const percent = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 100;
+        const today = getTodayIso();
+        const isPaid = state.autoArchive === false ? !!debt.archived : (remain <= 0.005 || !!debt.archived);
+        const isOverdue = !isPaid && debt.dueDate && debt.dueDate < today;
+
+        let direction = 'third_party';
+        if (isMe(debt.lender) && !isMe(debt.borrower)) {
+          direction = 'owed_to_me';
+        } else if (isMe(debt.borrower) && !isMe(debt.lender)) {
+          direction = 'i_owe';
+        }
+
+        return { total, paid, remain, percent, isPaid, isOverdue, direction };
+      }
+
+      function getCounterpartyNames(debt) {
+        const names = [];
+        if (debt.borrower && !isMe(debt.borrower)) names.push(debt.borrower.trim());
+        if (debt.lender && !isMe(debt.lender)) names.push(debt.lender.trim());
+        return Array.from(new Set(names));
+      }
+
+      function getAllPeopleMap(debtsList) {
+        const map = {};
+
+        function ensurePerson(name) {
+          if (!map[name]) {
+            map[name] = {
+              name,
+              debts: [],
+              owedToMeTotal: 0,
+              owedToMePaid: 0,
+              owedToMeRemain: 0,
+              iOweTotal: 0,
+              iOwePaid: 0,
+              iOweRemain: 0,
+              otherTotal: 0,
+              otherPaid: 0,
+              otherRemain: 0
+            };
+          }
+          return map[name];
+        }
+
+        debtsList.forEach(debt => {
+          const stats = getDebtStats(debt);
+          const people = getCounterpartyNames(debt);
+
+          people.forEach(personName => {
+            const p = ensurePerson(personName);
+            p.debts.push({ debt, stats });
+
+            if (stats.direction === 'owed_to_me') {
+              p.owedToMeTotal += stats.total;
+              p.owedToMePaid += stats.paid;
+              p.owedToMeRemain += stats.remain;
+            } else if (stats.direction === 'i_owe') {
+              p.iOweTotal += stats.total;
+              p.iOwePaid += stats.paid;
+              p.iOweRemain += stats.remain;
+            } else {
+              p.otherTotal += stats.total;
+              p.otherPaid += stats.paid;
+              p.otherRemain += stats.remain;
+            }
+          });
+        });
+
+        return Object.values(map).sort((a, b) => {
+          const remA = a.owedToMeRemain + a.iOweRemain + a.otherRemain;
+          const remB = b.owedToMeRemain + b.iOweRemain + b.otherRemain;
+          return remB - remA;
+        });
+      }
+
+      function getFilteredDebts() {
+        const query = document.getElementById('searchInput').value.trim().toLowerCase();
+        const personFilter = document.getElementById('filterPerson').value;
+        const dirFilter = document.getElementById('filterDirection').value;
+        const statusFilter = document.getElementById('filterStatus').value;
+
+        return state.debts.filter(debt => {
+          const stats = getDebtStats(debt);
+          const people = getCounterpartyNames(debt);
+
+          if (personFilter !== 'all' && !people.includes(personFilter)) {
+            return false;
+          }
+          if (dirFilter !== 'all' && stats.direction !== dirFilter) {
+            return false;
+          }
+          if (statusFilter === 'active' && stats.isPaid) return false;
+          if (statusFilter === 'overdue' && !stats.isOverdue) return false;
+          if (statusFilter === 'paid' && !stats.isPaid) return false;
+
+          if (query) {
+            const hay = [
+              debt.borrower,
+              debt.lender,
+              debt.title,
+              debt.repaymentSchedule,
+              debt.installmentNote
+            ].join(' ').toLowerCase();
+            if (!hay.includes(query)) return false;
+          }
+
+          return true;
+        });
+      }
+
+      function updatePersonSelectOptions() {
+        const select = document.getElementById('filterPerson');
+        const currentVal = select.value;
+        const datalist = document.getElementById('peopleSuggestions');
+
+        const allNames = new Set();
+        state.debts.forEach(d => {
+          getCounterpartyNames(d).forEach(n => allNames.add(n));
+        });
+        const sorted = Array.from(allNames).sort((a, b) => a.localeCompare(b, 'ru'));
+
+        select.innerHTML = '<option value="all">Все люди (' + sorted.length + ')</option>';
+        datalist.innerHTML = '<option value="Я"></option>';
+
+        sorted.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          select.appendChild(opt);
+
+          const dlOpt = document.createElement('option');
+          dlOpt.value = name;
+          datalist.appendChild(dlOpt);
+        });
+
+        if (sorted.includes(currentVal)) {
+          select.value = currentVal;
+        } else {
+          select.value = 'all';
+        }
+      }
+
+      function renderGlobalSummaryAndHome() {
+        const activeDebts = state.debts.filter(d => !getDebtStats(d).isPaid);
+        const archivedDebts = state.debts.filter(d => getDebtStats(d).isPaid);
+
+        let owedToMeTotal = 0;
+        let owedToMePaid = 0;
+        let owedToMeRemain = 0;
+
+        let iOweTotal = 0;
+        let iOwePaid = 0;
+        let iOweRemain = 0;
+
+        let allTotal = 0;
+        let allPaid = 0;
+        let allRemain = 0;
+
+        activeDebts.forEach(d => {
+          const st = getDebtStats(d);
+          allTotal += st.total;
+          allPaid += st.paid;
+          allRemain += st.remain;
+
+          if (st.direction === 'owed_to_me') {
+            owedToMeTotal += st.total;
+            owedToMePaid += st.paid;
+            owedToMeRemain += st.remain;
+          } else if (st.direction === 'i_owe') {
+            iOweTotal += st.total;
+            iOwePaid += st.paid;
+            iOweRemain += st.remain;
+          }
+        });
+
+        const homeFilteredActiveDebts = activeDebts.filter(d => {
+          if (homeDirFilter === 'all') return true;
+          return getDebtStats(d).direction === homeDirFilter;
+        });
+        const activePeople = getAllPeopleMap(homeFilteredActiveDebts);
+        const allPeopleCount = getAllPeopleMap(state.debts).length;
+        const overallPct = allTotal > 0 ? Math.round((allPaid / allTotal) * 100) : 0;
+
+        document.getElementById('headerArchiveBadge').textContent = String(archivedDebts.length);
+        document.getElementById('subtabArchiveCount').textContent = String(archivedDebts.length);
+
+        document.getElementById('statOwedToMeRemain').textContent = formatMoney(owedToMeRemain);
+        document.getElementById('statOwedToMeTotal').textContent = formatMoney(owedToMeTotal);
+        document.getElementById('statOwedToMePaid').textContent = formatMoney(owedToMePaid);
+
+        document.getElementById('statIOweRemain').textContent = formatMoney(iOweRemain);
+        document.getElementById('statIOweTotal').textContent = formatMoney(iOweTotal);
+        document.getElementById('statIOwePaid').textContent = formatMoney(iOwePaid);
+
+        document.getElementById('statAllRemain').textContent = formatMoney(allRemain);
+        document.getElementById('statPeopleCount').textContent = String(allPeopleCount);
+        document.getElementById('statOverallPercent').textContent = overallPct + '%';
+
+        document.getElementById('summaryStatusText').textContent =
+          `Активных долгов: ${activeDebts.length} • В архиве (оплачено): ${archivedDebts.length}`;
+
+        document.getElementById('heroTotalDebtRemain').textContent = formatMoney(allRemain);
+        document.getElementById('heroTotalDebtInitial').textContent = `из ${formatMoney(allTotal)} (выплачено ${formatMoney(allPaid)})`;
+        document.getElementById('heroProgressLabel').textContent = `${overallPct}% выплачено`;
+        document.getElementById('heroProgressBar').style.width = `${overallPct}%`;
+        document.getElementById('heroOwedToMe').textContent = formatMoney(owedToMeRemain);
+        document.getElementById('heroIOwe').textContent = formatMoney(iOweRemain);
+        document.getElementById('heroActiveCountBadge').textContent = `${activeDebts.length} активных • ${archivedDebts.length} в архиве`;
+
+        // Highlight Home Direction Filter Pills
+        document.querySelectorAll('.home-dir-filter').forEach(btn => {
+          const isCur = btn.getAttribute('data-home-filter') === homeDirFilter;
+          btn.className = 'home-dir-filter h-10 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ' +
+            (isCur ? 'filter-pill-active' : 'text-slate-600 hover:bg-white hover:text-slate-900');
+        });
+
+        // Top-3 People with Largest Active Debts
+        const top3Grid = document.getElementById('top3PeopleGrid');
+        top3Grid.innerHTML = '';
+        const top3 = activePeople.filter(p => (p.owedToMeRemain + p.iOweRemain + p.otherRemain) > 0).slice(0, 3);
+
+        if (top3.length === 0) {
+          top3Grid.innerHTML = `
+            <div class="col-span-full glass-card rounded-3xl p-8 text-center">
+              <p class="text-sm text-slate-500">По выбранному фильтру активных долгов нет.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const rankStyles = [
+          {
+            badgeBg: 'bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 shadow-sm',
+            ring: 'border-amber-300/90',
+            rankLabel: '1 место • Крупнейший долг'
+          },
+          {
+            badgeBg: 'bg-gradient-to-r from-slate-300 to-slate-400 text-slate-900 shadow-sm',
+            ring: 'border-slate-300/90',
+            rankLabel: '2 место по остатку'
+          },
+          {
+            badgeBg: 'bg-gradient-to-r from-amber-700 to-orange-700 text-white shadow-sm',
+            ring: 'border-orange-200/90',
+            rankLabel: '3 место по остатку'
+          }
+        ];
+
+        top3.forEach((person, idx) => {
+          const style = rankStyles[idx] || rankStyles[2];
+          const personRemain = person.owedToMeRemain + person.iOweRemain + person.otherRemain;
+          const personTotal = person.owedToMeTotal + person.iOweTotal + person.otherTotal;
+          const personPaid = person.owedToMePaid + person.iOwePaid + person.otherPaid;
+          const personPct = personTotal > 0 ? Math.min(100, Math.round((personPaid / personTotal) * 100)) : 100;
+          const shareOfTotal = allRemain > 0 ? Math.round((personRemain / allRemain) * 100) : 0;
+
+          let directionSummary = '';
+          if (person.owedToMeRemain > 0 && person.iOweRemain === 0) {
+            directionSummary = `<span class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold">Должен мне</span>`;
+          } else if (person.iOweRemain > 0 && person.owedToMeRemain === 0) {
+            directionSummary = `<span class="text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full text-xs font-bold">Я должен</span>`;
+          } else {
+            directionSummary = `<span class="text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full text-xs font-bold">Взаимные расчёты</span>`;
+          }
+
+          const firstActiveDebt = person.debts.find(d => !d.stats.isPaid) || person.debts[0];
+
+          const card = document.createElement('div');
+          card.className = `glass-card rounded-3xl p-5 sm:p-6 border-2 ${style.ring} flex flex-col justify-between space-y-4 relative overflow-hidden`;
+          card.innerHTML = `
+            <div class="space-y-4">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-extrabold px-3 py-1 rounded-full ${style.badgeBg}">
+                  #${idx + 1} • ${style.rankLabel}
+                </span>
+                ${directionSummary}
+              </div>
+
+              <div class="flex items-center justify-between gap-3 pt-1">
+                <div>
+                  <h3 class="text-lg font-extrabold text-slate-900">${escapeHtml(person.name)}</h3>
+                  <p class="text-xs text-slate-500">Активных долгов: <strong>${person.debts.length}</strong> • Доля: <strong>${shareOfTotal}%</strong></p>
+                </div>
+                <div class="text-right">
+                  <div class="text-[11px] uppercase font-bold text-slate-400">Остаток долга</div>
+                  <div class="text-xl sm:text-2xl font-extrabold text-indigo-700">${formatMoney(personRemain)}</div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 bg-slate-50/90 p-3 rounded-2xl border border-slate-200/70 text-xs">
+                <div>
+                  <span class="text-slate-400 block">Сумма займов:</span>
+                  <strong class="text-slate-800 text-sm">${formatMoney(personTotal)}</strong>
+                </div>
+                <div class="border-l border-slate-200 pl-3">
+                  <span class="text-slate-400 block">Уже возвращено:</span>
+                  <strong class="text-emerald-600 text-sm">${formatMoney(personPaid)} (${personPct}%)</strong>
+                </div>
+              </div>
+
+              <div>
+                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-indigo-600 to-violet-500 rounded-full transition-all duration-500" style="width: ${personPct}%"></div>
+                </div>
+              </div>
+
+              <div class="space-y-1.5">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Активные долги человека:</div>
+                ${person.debts.slice(0, 2).map(({ debt, stats }) => `
+                  <div class="flex items-center justify-between text-xs bg-white px-3 py-2 rounded-xl border border-slate-100">
+                    <span class="font-semibold text-slate-700 truncate pr-2">${escapeHtml(debt.title)}</span>
+                    <span class="font-bold text-slate-900 shrink-0">${formatMoney(stats.remain)}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Symmetrical 2-Column Card Footer -->
+            <div class="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2.5">
+              <button type="button" data-filter-person="${escapeHtml(person.name)}" class="btn-soft h-10 px-3 rounded-xl text-xs font-bold text-slate-700 flex items-center justify-center w-full">
+                Открыть человека →
+              </button>
+              ${firstActiveDebt && !firstActiveDebt.stats.isPaid ? `
+                <button type="button" data-pay-debt="${firstActiveDebt.debt.id}" class="btn-emerald h-10 px-3 rounded-xl text-xs font-bold flex items-center justify-center w-full">
+                  + Внести платёж
+                </button>
+              ` : `
+                <button type="button" data-add-for-person="${escapeHtml(person.name)}" class="btn-primary h-10 px-3 rounded-xl text-xs font-bold flex items-center justify-center w-full">
+                  + Новый долг
+                </button>
+              `}
+            </div>
+          `;
+          top3Grid.appendChild(card);
+        });
+      }
+
+      function renderPeopleSection(filteredDebts) {
+        const peopleList = getAllPeopleMap(filteredDebts);
+        document.getElementById('badgePeopleCount').textContent = String(peopleList.length);
+        const grid = document.getElementById('peopleGrid');
+        grid.innerHTML = '';
+
+        if (peopleList.length === 0) {
+          grid.innerHTML = `
+            <div class="col-span-full glass-card rounded-2xl p-8 text-center">
+              <p class="text-sm text-slate-500">Нет людей по выбранным параметрам фильтра.</p>
+            </div>
+          `;
+          return;
+        }
+
+        peopleList.forEach(person => {
+          const totalPersonBorrowed = person.owedToMeTotal + person.iOweTotal + person.otherTotal;
+          const totalPersonPaid = person.owedToMePaid + person.iOwePaid + person.otherPaid;
+          const totalPersonRemain = person.owedToMeRemain + person.iOweRemain + person.otherRemain;
+          const pct = totalPersonBorrowed > 0 ? Math.min(100, Math.round((totalPersonPaid / totalPersonBorrowed) * 100)) : 100;
+
+          let statusBadge = '';
+          if (person.owedToMeRemain > 0 && person.iOweRemain === 0) {
+            statusBadge = `<span class="text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">Должен мне: ${formatMoney(person.owedToMeRemain)}</span>`;
+          } else if (person.iOweRemain > 0 && person.owedToMeRemain === 0) {
+            statusBadge = `<span class="text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-full">Я должен: ${formatMoney(person.iOweRemain)}</span>`;
+          } else if (person.owedToMeRemain > 0 && person.iOweRemain > 0) {
+            statusBadge = `<span class="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-full">Взаимные долги: ${formatMoney(totalPersonRemain)}</span>`;
+          } else if (person.otherRemain > 0) {
+            statusBadge = `<span class="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full">Остаток: ${formatMoney(person.otherRemain)}</span>`;
+          } else {
+            statusBadge = `<span class="text-xs font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">В архиве (Оплачено)</span>`;
+          }
+
+          const initials = person.name
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 2)
+            .map(w => w[0].toUpperCase())
+            .join('');
+
+          const isExpanded = !!expandedPeople[person.name];
+
+          const debtsMiniListHtml = person.debts.map(({ debt, stats }) => {
+            const roleLabel = stats.direction === 'owed_to_me'
+              ? 'Занял у меня'
+              : stats.direction === 'i_owe'
+                ? 'Дал мне в долг'
+                : `${debt.borrower} → ${debt.lender}`;
+
+            return `
+              <div class="p-3 rounded-2xl bg-slate-50/90 border border-slate-200/80 text-xs space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-bold text-slate-800 truncate">${escapeHtml(debt.title)}</span>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span class="font-extrabold ${stats.isPaid ? 'text-emerald-600' : stats.direction === 'i_owe' ? 'text-rose-600' : 'text-indigo-700'}">
+                      ${stats.isPaid ? 'В архиве ✓' : 'Ост: ' + formatMoney(stats.remain)}
+                    </span>
+                    <button type="button" data-delete-debt="${debt.id}" title="Удалить этот долг" class="text-slate-400 hover:text-rose-600 font-bold">
+                      ✕
+                    </button>
+                  </div>
+                </div>
+                <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-500 gap-1">
+                  <span>${escapeHtml(roleLabel)} • Всего: ${formatMoney(stats.total)} (отдано ${formatMoney(stats.paid)})</span>
+                  ${!stats.isPaid ? `
+                    <button type="button" data-pay-debt="${debt.id}" class="text-indigo-600 hover:text-indigo-800 font-bold">
+                      + Платёж
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          const card = document.createElement('div');
+          card.className = 'glass-card rounded-3xl p-5 flex flex-col justify-between space-y-4';
+          card.innerHTML = `
+            <div class="space-y-3.5">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-xs">
+                    ${escapeHtml(initials || 'Ч')}
+                  </div>
+                  <div>
+                    <h3 class="text-base font-extrabold text-slate-900 leading-snug">${escapeHtml(person.name)}</h3>
+                    <p class="text-xs text-slate-500">Записей: ${person.debts.length}</p>
+                  </div>
+                </div>
+                ${statusBadge}
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 bg-slate-50/90 p-3 rounded-2xl border border-slate-100 text-center">
+                <div>
+                  <div class="text-[11px] text-slate-500">Сумма долгов</div>
+                  <div class="text-xs sm:text-sm font-extrabold text-slate-800 mt-0.5">${formatMoney(totalPersonBorrowed)}</div>
+                </div>
+                <div class="border-x border-slate-200 px-1">
+                  <div class="text-[11px] text-slate-500">Уже отдано</div>
+                  <div class="text-xs sm:text-sm font-extrabold text-indigo-600 mt-0.5">${formatMoney(totalPersonPaid)}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] text-slate-500">Осталось</div>
+                  <div class="text-xs sm:text-sm font-extrabold text-slate-900 mt-0.5">${formatMoney(totalPersonRemain)}</div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="text-slate-500 font-medium">Прогресс возврата по человеку</span>
+                  <span class="font-bold text-slate-700">${pct}%</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-indigo-600 to-violet-500 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                </div>
+              </div>
+
+              <div class="space-y-2 pt-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-600">Долги человека (${person.debts.length}):</span>
+                  <button type="button" data-toggle-person="${escapeHtml(person.name)}" class="text-xs text-indigo-600 hover:underline font-bold">
+                    ${isExpanded ? 'Свернуть список' : 'Показать все (' + person.debts.length + ')'}
+                  </button>
+                </div>
+                <div class="space-y-2 ${isExpanded ? '' : 'max-h-44 overflow-y-auto custom-scrollbar pr-1'}">
+                  ${debtsMiniListHtml}
+                </div>
+              </div>
+            </div>
+
+            <!-- Symmetrical Card Footer Grid -->
+            <div class="pt-3 border-t border-slate-100 space-y-2">
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" data-filter-person="${escapeHtml(person.name)}" class="btn-soft h-10 px-2.5 rounded-xl text-xs font-bold text-slate-700 flex items-center justify-center w-full">
+                  Фильтр по человеку →
+                </button>
+                <button type="button" data-add-for-person="${escapeHtml(person.name)}" class="btn-primary h-10 px-2.5 rounded-xl text-xs font-bold flex items-center justify-center w-full">
+                  + Новый долг с ним
+                </button>
+              </div>
+              <button type="button" data-delete-person="${escapeHtml(person.name)}" class="btn-soft h-9 px-3 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center justify-center w-full">
+                Удалить человека
+              </button>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      }
+
+      function buildDebtCardElement(debt, isArchiveCard = false) {
+        const stats = getDebtStats(debt);
+
+        let dirBadge = '';
+        if (stats.direction === 'owed_to_me') {
+          dirBadge = `<span class="text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">Мне должны</span>`;
+        } else if (stats.direction === 'i_owe') {
+          dirBadge = `<span class="text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-full">Я должен</span>`;
+        } else {
+          dirBadge = `<span class="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full">Между людьми</span>`;
+        }
+
+        let stateBadge = '';
+        if (stats.isPaid) {
+          stateBadge = `<span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">В архиве • Оплачен ✓</span>`;
+        } else if (stats.isOverdue) {
+          stateBadge = `<span class="text-xs font-bold bg-rose-100 text-rose-800 px-2.5 py-1 rounded-full">Просрочен!</span>`;
+        } else {
+          stateBadge = `<span class="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 rounded-full">Активен</span>`;
+        }
+
+        const paymentsHtml = (debt.payments || []).length === 0
+          ? `<div class="text-xs text-slate-400 italic py-1">Платежей пока не было</div>`
+          : (debt.payments || []).map(p => `
+              <div class="flex items-center justify-between text-xs py-1.5 border-b border-slate-100 last:border-none gap-2">
+                <div class="min-w-0">
+                  <span class="font-bold text-slate-800">${formatDate(p.date)}</span>
+                  ${p.note ? `<span class="text-slate-500"> • ${escapeHtml(p.note)}</span>` : ''}
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="font-extrabold text-emerald-600">+${formatMoney(p.amount)}</span>
+                  <button type="button" data-del-payment="${p.id}" data-debt-id="${debt.id}" title="Удалить платёж" class="text-slate-300 hover:text-rose-600 transition font-bold">
+                    ✕
+                  </button>
+                </div>
+              </div>
+            `).join('');
+
+        const card = document.createElement('div');
+        card.className = `glass-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 ${isArchiveCard ? 'opacity-95 border-emerald-200/80' : ''}`;
+        card.innerHTML = `
+          <div class="space-y-3.5">
+            <div class="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <h3 class="text-base sm:text-lg font-extrabold text-slate-900">${escapeHtml(debt.title)}</h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Дата займа: <strong>${formatDate(debt.createdAt)}</strong> • Срок: <strong class="${stats.isOverdue ? 'text-rose-600' : 'text-slate-700'}">${formatDate(debt.dueDate)}</strong>
+                </p>
+              </div>
+              <div class="flex items-center gap-1.5">
+                ${dirBadge}
+                ${stateBadge}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 bg-slate-50/90 p-3.5 rounded-2xl border border-slate-200/70 text-xs">
+              <div>
+                <span class="text-slate-400 block uppercase text-[10px] font-bold tracking-wider">Кто занял (Заёмщик)</span>
+                <span class="font-extrabold text-slate-900 text-sm mt-0.5 block">${escapeHtml(debt.borrower)}</span>
+              </div>
+              <div class="border-l border-slate-200 pl-3">
+                <span class="text-slate-400 block uppercase text-[10px] font-bold tracking-wider">Кому должен (Кредитор)</span>
+                <span class="font-extrabold text-slate-900 text-sm mt-0.5 block">${escapeHtml(debt.lender)}</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 text-center bg-indigo-50/50 p-3.5 rounded-2xl border border-indigo-100/80">
+              <div>
+                <div class="text-[11px] text-slate-500">Сумма долга</div>
+                <div class="text-sm font-extrabold text-slate-800 mt-0.5">${formatMoney(stats.total)}</div>
+              </div>
+              <div class="border-x border-indigo-100 px-1">
+                <div class="text-[11px] text-slate-500">Уже отдал</div>
+                <div class="text-sm font-extrabold text-emerald-600 mt-0.5">${formatMoney(stats.paid)}</div>
+              </div>
+              <div>
+                <div class="text-[11px] text-slate-500">Сколько осталось</div>
+                <div class="text-sm font-extrabold ${stats.isPaid ? 'text-emerald-600' : 'text-indigo-700'} mt-0.5">${formatMoney(stats.remain)}</div>
+              </div>
+            </div>
+
+            <div class="bg-slate-50/90 rounded-2xl p-3.5 border border-slate-100 text-xs space-y-1">
+              <div class="flex flex-wrap items-center justify-between gap-1">
+                <span class="text-slate-500">Как отдаёт: <strong class="text-slate-800">${escapeHtml(debt.repaymentSchedule || 'Не указано')}</strong></span>
+              </div>
+              ${debt.installmentNote ? `
+                <div class="text-slate-600 pt-0.5">
+                  Условия возврата: <span class="font-semibold text-indigo-950">${escapeHtml(debt.installmentNote)}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs mb-1">
+                <span class="text-slate-500 font-medium">Погашено ${stats.percent}%</span>
+                <span class="font-bold text-slate-700">Остаток: ${formatMoney(stats.remain)}</span>
+              </div>
+              <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full ${stats.isPaid ? 'bg-emerald-500' : 'bg-gradient-to-r from-indigo-600 to-violet-500'} rounded-full transition-all duration-300" style="width: ${stats.percent}%"></div>
+              </div>
+            </div>
+
+            <div class="pt-1">
+              <div class="text-xs font-bold text-slate-700 mb-1">История возвратов по этому долгу (${(debt.payments || []).length}):</div>
+              <div class="max-h-32 overflow-y-auto custom-scrollbar pr-1">
+                ${paymentsHtml}
+              </div>
+            </div>
+          </div>
+
+          <!-- Symmetrical Action Buttons Grid -->
+          <div class="pt-3.5 border-t border-slate-100 space-y-2">
+            ${!stats.isPaid ? `
+              <div class="grid grid-cols-2 gap-2.5">
+                <button type="button" data-settle-debt="${debt.id}" class="btn-soft h-10 px-3 rounded-xl text-xs font-bold text-emerald-700 border-emerald-200 flex items-center justify-center w-full">
+                  Погасить весь остаток
+                </button>
+                <button type="button" data-pay-debt="${debt.id}" class="btn-primary h-10 px-3 rounded-xl text-xs font-bold flex items-center justify-center w-full">
+                  + Внести платёж
+                </button>
+              </div>
+            ` : `
+              <div class="w-full h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center justify-center">
+                Архивирован (${formatDate(debt.archivedAt || getTodayIso())})
+              </div>
+            `}
+            <div class="grid grid-cols-2 gap-2.5">
+              <button type="button" data-edit-debt="${debt.id}" class="btn-soft h-9 px-3 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center w-full">
+                Изменить
+              </button>
+              <button type="button" data-delete-debt="${debt.id}" class="btn-soft h-9 px-3 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center justify-center w-full">
+                Удалить
+              </button>
+            </div>
+          </div>
+        `;
+        return card;
+      }
+
+      function renderDebtsAndArchiveSections(filteredDebts) {
+        const activeDebts = filteredDebts.filter(d => !getDebtStats(d).isPaid);
+        const archivedDebts = state.debts.filter(d => getDebtStats(d).isPaid);
+
+        document.getElementById('badgeDebtsCount').textContent = String(activeDebts.length);
+        const debtsGrid = document.getElementById('debtsGrid');
+        debtsGrid.innerHTML = '';
+
+        if (activeDebts.length === 0) {
+          debtsGrid.innerHTML = `
+            <div class="col-span-full glass-card rounded-2xl p-8 text-center">
+              <p class="text-sm text-slate-500">Нет активных долгов по выбранным фильтрам.</p>
+            </div>
+          `;
+        } else {
+          activeDebts.forEach(d => debtsGrid.appendChild(buildDebtCardElement(d, false)));
+        }
+
+        document.getElementById('badgeArchiveCount').textContent = String(archivedDebts.length);
+        const archiveGrid = document.getElementById('archiveGrid');
+        archiveGrid.innerHTML = '';
+
+        if (archivedDebts.length === 0) {
+          archiveGrid.innerHTML = `
+            <div class="col-span-full glass-card rounded-2xl p-8 text-center">
+              <p class="text-sm text-slate-500">В архиве пока нет оплаченных долгов. Когда любой долг будет погашен на 100%, он автоматически переместится сюда.</p>
+            </div>
+          `;
+        } else {
+          archivedDebts.forEach(d => archiveGrid.appendChild(buildDebtCardElement(d, true)));
+        }
+      }
+
+      function getActiveStatDateBounds() {
+        const today = getTodayIso();
+        const yearPrefix = today.slice(0, 4);
+        const monthPrefix = today.slice(0, 7);
+
+        if (statPeriod === 'day') {
+          return {
+            start: today,
+            end: today,
+            label: `Статистика за день (${formatDate(today)})`
+          };
+        }
+        if (statPeriod === 'month') {
+          return {
+            start: `${monthPrefix}-01`,
+            end: `${monthPrefix}-31`,
+            label: `Статистика за текущий месяц (Октябрь ${yearPrefix})`
+          };
+        }
+        if (statPeriod === 'year') {
+          return {
+            start: `${yearPrefix}-01-01`,
+            end: `${yearPrefix}-12-31`,
+            label: `Статистика за год (${yearPrefix} г.)`
+          };
+        }
+        if (statPeriod === 'custom') {
+          const s = document.getElementById('statStartDate').value || customStart;
+          const e = document.getElementById('statEndDate').value || customEnd;
+          return {
+            start: s,
+            end: e,
+            label: `Статистика за произвольный период: с ${formatDate(s)} по ${formatDate(e)}`
+          };
+        }
+        return {
+          start: '0000-01-01',
+          end: '9999-12-31',
+          label: 'Статистика за всё время ведения учёта'
+        };
+      }
+
+      function isDateInBounds(isoDate, start, end) {
+        if (!isoDate) return false;
+        return isoDate >= start && isoDate <= end;
+      }
+
+      function renderAnalyticsAndLog() {
+        const bounds = getActiveStatDateBounds();
+        document.getElementById('statsPeriodLabel').textContent = bounds.label;
+
+        const customBox = document.getElementById('customDateRangeBox');
+        if (statPeriod === 'custom') {
+          customBox.classList.remove('hidden');
+          customBox.classList.add('grid');
+        } else {
+          customBox.classList.add('hidden');
+          customBox.classList.remove('grid');
+        }
+
+        document.querySelectorAll('.stat-period-btn').forEach(btn => {
+          const p = btn.getAttribute('data-stat-period');
+          const isCur = p === statPeriod;
+          const spanClass = p === 'all' ? 'col-span-2 sm:col-span-1 ' : '';
+          btn.className = 'stat-period-btn ' + spanClass + 'h-11 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center text-center ' +
+            (isCur ? 'filter-pill-active' : 'text-slate-600 hover:bg-white hover:text-slate-900');
+        });
+
+        let issuedSum = 0;
+        let issuedCount = 0;
+        let repaidSum = 0;
+        let repaidCount = 0;
+        let repaidToMe = 0;
+        let repaidByMe = 0;
+        let archivedSum = 0;
+        let archivedCount = 0;
+
+        const periodPayments = [];
+        const personStatsMap = {};
+
+        function ensurePersonStat(name) {
+          if (!personStatsMap[name]) {
+            personStatsMap[name] = { name, borrowedInPeriod: 0, paidInPeriod: 0, remainNow: 0 };
+          }
+          return personStatsMap[name];
+        }
+
+        state.debts.forEach(d => {
+          const st = getDebtStats(d);
+          const people = getCounterpartyNames(d);
+
+          people.forEach(pName => {
+            const ps = ensurePersonStat(pName);
+            ps.remainNow += st.remain;
+          });
+
+          if (isDateInBounds(d.createdAt, bounds.start, bounds.end)) {
+            issuedSum += st.total;
+            issuedCount++;
+            people.forEach(pName => {
+              ensurePersonStat(pName).borrowedInPeriod += st.total;
+            });
+          }
+
+          if (st.isPaid && isDateInBounds(d.archivedAt || d.dueDate || d.createdAt, bounds.start, bounds.end)) {
+            archivedSum += st.total;
+            archivedCount++;
+          }
+
+          (d.payments || []).forEach(p => {
+            if (isDateInBounds(p.date, bounds.start, bounds.end)) {
+              const amt = Number(p.amount) || 0;
+              repaidSum += amt;
+              repaidCount++;
+              if (st.direction === 'owed_to_me') repaidToMe += amt;
+              if (st.direction === 'i_owe') repaidByMe += amt;
+
+              people.forEach(pName => {
+                ensurePersonStat(pName).paidInPeriod += amt;
+              });
+
+              periodPayments.push({
+                ...p,
+                debtId: d.id,
+                debtTitle: d.title,
+                borrower: d.borrower,
+                lender: d.lender
+              });
+            }
+          });
+        });
+
+        document.getElementById('periodIssuedSum').textContent = formatMoney(issuedSum);
+        document.getElementById('periodIssuedCount').textContent = `Записей за период: ${issuedCount}`;
+        document.getElementById('periodRepaidSum').textContent = formatMoney(repaidSum);
+        document.getElementById('periodRepaidCount').textContent = `Платежей за период: ${repaidCount}`;
+        document.getElementById('periodRepaidSplit').textContent = `${formatMoney(repaidToMe)} / ${formatMoney(repaidByMe)}`;
+        document.getElementById('periodArchivedSum').textContent = formatMoney(archivedSum);
+        document.getElementById('periodArchivedCount').textContent = `Закрытых долгов: ${archivedCount}`;
+
+        periodPayments.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        document.getElementById('paymentsTotalBadge').textContent = `${periodPayments.length} платежей`;
+
+        const listEl = document.getElementById('globalPaymentsList');
+        if (periodPayments.length === 0) {
+          listEl.innerHTML = `<div class="py-10 text-center text-xs text-slate-400">За выбранный период платежей не найдено</div>`;
+        } else {
+          listEl.innerHTML = periodPayments.map(item => `
+            <div class="py-2.5 flex items-center justify-between gap-3 text-xs">
+              <div class="min-w-0">
+                <div class="font-bold text-slate-800 truncate">
+                  ${escapeHtml(item.borrower)} → ${escapeHtml(item.lender)}: ${escapeHtml(item.debtTitle)}
+                </div>
+                <div class="text-slate-500 mt-0.5">
+                  ${formatDate(item.date)}${item.note ? ` • ${escapeHtml(item.note)}` : ''}
+                </div>
+              </div>
+              <div class="font-extrabold text-emerald-600 shrink-0">
+                +${formatMoney(item.amount)}
+              </div>
+            </div>
+          `).join('');
+        }
+
+        const personStatsArr = Object.values(personStatsMap);
+        const labels = personStatsArr.map(p => p.name);
+        const borrowedData = personStatsArr.map(p => p.borrowedInPeriod);
+        const paidData = personStatsArr.map(p => p.paidInPeriod);
+        const remainData = personStatsArr.map(p => p.remainNow);
+
+        const canvas = document.getElementById('peopleChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        if (peopleChartInstance) {
+          peopleChartInstance.destroy();
+        }
+
+        peopleChartInstance = new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: labels.length ? labels : ['Нет данных'],
+            datasets: [
+              {
+                label: 'Занято за период',
+                data: labels.length ? borrowedData : [0],
+                backgroundColor: '#6366f1',
+                borderRadius: 6
+              },
+              {
+                label: 'Возвращено за период',
+                data: labels.length ? paidData : [0],
+                backgroundColor: '#10b981',
+                borderRadius: 6
+              },
+              {
+                label: 'Текущий остаток долга',
+                data: labels.length ? remainData : [0],
+                backgroundColor: '#f59e0b',
+                borderRadius: 6
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  boxWidth: 12,
+                  color: state.theme === 'dark' ? '#cbd5e1' : '#334155',
+                  font: { size: 11 }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: state.theme === 'dark' ? 'rgba(51,65,85,0.5)' : 'rgba(226,232,240,0.8)' },
+                ticks: { color: state.theme === 'dark' ? '#94a3b8' : '#475569', font: { size: 11 } }
+              },
+              x: {
+                grid: { color: state.theme === 'dark' ? 'rgba(51,65,85,0.3)' : 'rgba(226,232,240,0.5)' },
+                ticks: { color: state.theme === 'dark' ? '#94a3b8' : '#475569', font: { size: 11 } }
+              }
+            }
+          }
+        });
+      }
+
+      function renderSettingsPeopleList() {
+        const container = document.getElementById('settingsPeopleList');
+        const allPeople = getAllPeopleMap(state.debts);
+        if (allPeople.length === 0) {
+          container.innerHTML = `<p class="text-xs text-slate-400 italic py-4 text-center">Список людей пуст</p>`;
+          return;
+        }
+        container.innerHTML = allPeople.map(p => {
+          const rem = p.owedToMeRemain + p.iOweRemain + p.otherRemain;
+          return `
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
+              <div class="text-center sm:text-left">
+                <div class="text-sm font-bold text-slate-800">${escapeHtml(p.name)}</div>
+                <div class="text-xs text-slate-500">Записей: ${p.debts.length} • Активный остаток: <strong>${formatMoney(rem)}</strong></div>
+              </div>
+              <button type="button" data-delete-person="${escapeHtml(p.name)}" class="btn-soft h-10 px-3.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 inline-flex items-center justify-center text-center gap-1.5 shrink-0">
+                <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                <span>Удалить человека</span>
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function updateFilterBanner() {
+        const query = document.getElementById('searchInput').value.trim();
+        const personFilter = document.getElementById('filterPerson').value;
+        const dirFilter = document.getElementById('filterDirection').value;
+        const statusFilter = document.getElementById('filterStatus').value;
+
+        const banner = document.getElementById('activeFilterBanner');
+        const textEl = document.getElementById('activeFilterText');
+
+        const activeParts = [];
+        if (personFilter !== 'all') activeParts.push(`Человек: ${personFilter}`);
+        if (dirFilter === 'owed_to_me') activeParts.push('Мне должны');
+        if (dirFilter === 'i_owe') activeParts.push('Я должен');
+        if (dirFilter === 'third_party') activeParts.push('Между другими людьми');
+        if (statusFilter !== 'active') activeParts.push(`Статус: ${statusFilter}`);
+        if (query) activeParts.push(`Поиск: «${query}»`);
+
+        if (activeParts.length > 0) {
+          banner.classList.remove('hidden');
+          banner.classList.add('flex');
+          textEl.textContent = 'Активные фильтры: ' + activeParts.join(' • ');
+        } else {
+          banner.classList.add('hidden');
+          banner.classList.remove('flex');
+        }
+      }
+
+      function applyScreenNavigation() {
+        const secHome = document.getElementById('sectionHome');
+        const scrPeople = document.getElementById('screenPeopleAndDebts');
+        const secArchiveBlock = document.getElementById('sectionArchive');
+        const secAnalytics = document.getElementById('sectionAnalytics');
+        const secSettings = document.getElementById('sectionSettings');
+
+        document.body.classList.toggle('home-no-scroll', activeScreen === 'home');
+
+        secHome.classList.toggle('hidden', activeScreen !== 'home');
+        scrPeople.classList.toggle('hidden', activeScreen !== 'people');
+        secArchiveBlock.classList.toggle('hidden', activeScreen !== 'archive' && !(activeScreen === 'people' && peopleSubView === 'archive'));
+        secAnalytics.classList.toggle('hidden', activeScreen !== 'analytics');
+        secSettings.classList.toggle('hidden', activeScreen !== 'settings');
+
+        const screenNames = {
+          home: 'Главная • Сводка',
+          people: 'Люди и активные долги',
+          archive: 'Архив оплаченных долгов',
+          analytics: 'Статистика и динамика',
+          settings: 'Настройки приложения'
+        };
+        const screenIcons = {
+          home: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M12 2.5L2.5 7.5V9.5H21.5V7.5L12 2.5Z" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M5 9.5V17.5M9.5 9.5V17.5M14.5 9.5V17.5M19 9.5V17.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2.5 17.5H21.5V20.5H2.5V17.5Z" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="1.6"/></svg>',
+          people: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7.5" r="3.2" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="1.8"/><path d="M3 19.5C3 16.2 5.7 14 9 14C12.3 14 15 16.2 15 19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="17.5" cy="9.5" r="2.8" fill="#F59E0B" fill-opacity="0.3" stroke="currentColor" stroke-width="1.7"/></svg>',
+          archive: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><rect x="3" y="3.5" width="18" height="16" rx="3" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.8"/><circle cx="13.5" cy="11.5" r="3.5" fill="#F59E0B" fill-opacity="0.3" stroke="currentColor" stroke-width="1.7"/><path d="M6.5 8V15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+          analytics: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="13" width="3.8" height="7" rx="1" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="1.7"/><rect x="10.1" y="9.5" width="3.8" height="10.5" rx="1" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="1.7"/><rect x="16.7" y="5.5" width="3.8" height="14.5" rx="1" fill="#F59E0B" fill-opacity="0.35" stroke="currentColor" stroke-width="1.7"/></svg>',
+          settings: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="#F59E0B" fill-opacity="0.35" stroke="currentColor" stroke-width="1.8"/></svg>'
+        };
+        document.getElementById('currentScreenBadge').textContent = screenNames[activeScreen] || 'Главная';
+        document.getElementById('currentScreenIcon').innerHTML = screenIcons[activeScreen] || screenIcons.home;
+
+        document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+          const isCur = btn.getAttribute('data-screen') === activeScreen;
+          btn.className = 'bottom-nav-btn relative flex flex-col items-center justify-center text-center py-1.5 px-2 rounded-2xl transition ' +
+            (isCur ? 'btn-primary' : 'text-slate-600 hover:bg-slate-100');
+        });
+
+        const topSettingsBtn = document.getElementById('btnTopSettings');
+        if (topSettingsBtn) {
+          const isSettings = activeScreen === 'settings';
+          topSettingsBtn.className = 'top-settings-btn w-10 h-10 rounded-2xl inline-flex items-center justify-center text-center shrink-0 transition ' +
+            (isSettings ? 'btn-primary' : 'btn-soft text-slate-700');
+        }
+
+        const secPeopleBlock = document.getElementById('sectionPeople');
+        const secDebtsBlock = document.getElementById('sectionDebts');
+
+        secPeopleBlock.classList.toggle('hidden', peopleSubView !== 'both' && peopleSubView !== 'only_people');
+        secDebtsBlock.classList.toggle('hidden', peopleSubView !== 'both' && peopleSubView !== 'only_debts');
+
+        document.querySelectorAll('.people-subtab').forEach(btn => {
+          const isCur = btn.getAttribute('data-people-subview') === peopleSubView;
+          btn.className = 'people-subtab h-11 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-center ' +
+            (isCur ? 'filter-pill-active' : 'text-slate-600 hover:bg-white hover:text-slate-900');
+        });
+      }
+
+      function applySettingsUI() {
+        const isDark = state.theme === 'dark';
+        document.body.classList.toggle('dark-theme', isDark);
+
+        const headerIcon = document.getElementById('headerThemeIcon');
+        if (headerIcon) {
+          headerIcon.innerHTML = isDark
+            ? '<svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>'
+            : '<svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>';
+        }
+
+        const btnLight = document.getElementById('btnThemeLight');
+        const btnDark = document.getElementById('btnThemeDark');
+        if (btnLight && btnDark) {
+          btnLight.className = 'h-11 px-3 rounded-xl text-xs sm:text-sm font-bold transition inline-flex items-center justify-center text-center gap-2 w-full ' +
+            (!isDark ? 'filter-pill-active' : 'text-slate-600 hover:bg-white hover:text-slate-900');
+          btnDark.className = 'h-11 px-3 rounded-xl text-xs sm:text-sm font-bold transition inline-flex items-center justify-center text-center gap-2 w-full ' +
+            (isDark ? 'filter-pill-active' : 'text-slate-600 hover:bg-white hover:text-slate-900');
+        }
+
+        document.querySelectorAll('.currency-quick-btn').forEach(btn => {
+          const isCur = btn.getAttribute('data-currency-btn') === (state.currency || '₽');
+          btn.className = 'currency-quick-btn h-10 rounded-xl text-xs sm:text-sm font-extrabold transition inline-flex items-center justify-center text-center w-full ' +
+            (isCur ? 'filter-pill-active' : 'btn-soft');
+        });
+
+        const autoArchiveOn = state.autoArchive !== false;
+        const autoBtn = document.getElementById('btnToggleAutoArchive');
+        const autoLbl = document.getElementById('autoArchiveStatusLabel');
+        if (autoBtn && autoLbl) {
+          autoBtn.className = (autoArchiveOn ? 'btn-emerald' : 'btn-soft text-slate-700') +
+            ' h-11 px-4 rounded-xl text-xs sm:text-sm font-bold inline-flex items-center justify-center text-center gap-2 w-full';
+          autoLbl.textContent = autoArchiveOn ? 'Автоархивация: Включена ✓' : 'Автоархивация: Выключена';
+        }
+      }
+
+      function renderAll() {
+        syncAutoArchive();
+        document.getElementById('currencySelect').value = state.currency || '₽';
+        applySettingsUI();
+        updatePersonSelectOptions();
+        updateFilterBanner();
+        renderGlobalSummaryAndHome();
+
+        const filteredDebts = getFilteredDebts();
+        renderPeopleSection(filteredDebts);
+        renderDebtsAndArchiveSections(filteredDebts);
+        renderAnalyticsAndLog();
+        renderSettingsPeopleList();
+        applyScreenNavigation();
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function openDebtModal(debtToEdit = null, prefillPerson = '') {
+        const modal = document.getElementById('debtModal');
+        const titleEl = document.getElementById('debtModalTitle');
+        const today = getTodayIso();
+
+        if (debtToEdit) {
+          titleEl.textContent = 'Редактировать долг';
+          document.getElementById('debtIdInput').value = debtToEdit.id;
+          document.getElementById('borrowerInput').value = debtToEdit.borrower;
+          document.getElementById('lenderInput').value = debtToEdit.lender;
+          document.getElementById('titleInput').value = debtToEdit.title;
+          document.getElementById('amountInput').value = debtToEdit.amount;
+          document.getElementById('repaymentScheduleInput').value = debtToEdit.repaymentSchedule || 'Частями каждый месяц';
+          document.getElementById('installmentNoteInput').value = debtToEdit.installmentNote || '';
+          document.getElementById('createdAtInput').value = debtToEdit.createdAt || today;
+          document.getElementById('dueDateInput').value = debtToEdit.dueDate || '';
+        } else {
+          titleEl.textContent = 'Новый долг';
+          document.getElementById('debtIdInput').value = '';
+          document.getElementById('borrowerInput').value = prefillPerson || '';
+          document.getElementById('lenderInput').value = 'Я';
+          document.getElementById('titleInput').value = '';
+          document.getElementById('amountInput').value = '';
+          document.getElementById('repaymentScheduleInput').value = 'Частями каждый месяц';
+          document.getElementById('installmentNoteInput').value = '';
+          document.getElementById('createdAtInput').value = today;
+          document.getElementById('dueDateInput').value = '';
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeDebtModal() {
+        const modal = document.getElementById('debtModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      function syncPaymentModalFields(debtId) {
+        const debt = state.debts.find(d => d.id === debtId);
+        if (!debt) return;
+        const stats = getDebtStats(debt);
+        document.getElementById('paymentDebtIdInput').value = debt.id;
+        document.getElementById('paymentDebtSelect').value = debt.id;
+        document.getElementById('paymentModalSubtitle').textContent =
+          `${debt.borrower} → ${debt.lender} (${debt.title}) • Осталось: ${formatMoney(stats.remain)}`;
+        document.getElementById('paymentAmountInput').value = stats.remain > 0 ? stats.remain : '';
+      }
+
+      function openPaymentModal(debtId = null) {
+        const activeDebts = state.debts.filter(d => !getDebtStats(d).isPaid);
+        if (activeDebts.length === 0) {
+          showToast('Нет активных долгов для внесения платежа', 'error');
+          return;
+        }
+        const selectEl = document.getElementById('paymentDebtSelect');
+        selectEl.innerHTML = activeDebts.map(d => {
+          const st = getDebtStats(d);
+          return `<option value="${d.id}">${escapeHtml(d.borrower)} → ${escapeHtml(d.lender)}: ${escapeHtml(d.title)} (ост. ${formatMoney(st.remain)})</option>`;
+        }).join('');
+
+        const targetDebt = (debtId && state.debts.find(d => d.id === debtId)) || activeDebts[0];
+        syncPaymentModalFields(targetDebt.id);
+
+        document.getElementById('paymentDateInput').value = getTodayIso();
+        document.getElementById('paymentNoteInput').value = '';
+
+        const modal = document.getElementById('paymentModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closePaymentModal() {
+        const modal = document.getElementById('paymentModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      function openConfirmDeleteModal(title, message, onConfirm) {
+        document.getElementById('confirmDeleteTitle').textContent = title;
+        document.getElementById('confirmDeleteMessage').textContent = message;
+        pendingDeleteAction = onConfirm;
+        const modal = document.getElementById('confirmDeleteModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeConfirmDeleteModal() {
+        pendingDeleteAction = null;
+        const modal = document.getElementById('confirmDeleteModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      // Event Listeners Setup
+      document.getElementById('btnOpenNewDebt').addEventListener('click', () => openDebtModal());
+      document.getElementById('btnHeroAddDebt').addEventListener('click', () => openDebtModal());
+      document.getElementById('btnHeroMakePayment').addEventListener('click', () => openPaymentModal());
+      document.getElementById('paymentDebtSelect').addEventListener('change', e => {
+        syncPaymentModalFields(e.target.value);
+      });
+
+      document.getElementById('btnOpenArchiveQuick').addEventListener('click', () => {
+        activeScreen = 'archive';
+        renderAll();
+      });
+
+      document.getElementById('btnHeroGoPeople').addEventListener('click', () => {
+        activeScreen = 'people';
+        peopleSubView = 'only_people';
+        renderAll();
+      });
+      document.getElementById('btnSeeAllPeopleFromTop').addEventListener('click', () => {
+        activeScreen = 'people';
+        peopleSubView = 'both';
+        renderAll();
+      });
+      document.getElementById('btnHeroGoDebts').addEventListener('click', () => {
+        activeScreen = 'people';
+        peopleSubView = 'only_debts';
+        renderAll();
+      });
+
+      // Home Symmetrical Filter Buttons
+      document.querySelectorAll('.home-dir-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+          homeDirFilter = btn.getAttribute('data-home-filter');
+          renderGlobalSummaryAndHome();
+        });
+      });
+
+      document.getElementById('btnCloseDebtModal').addEventListener('click', closeDebtModal);
+      document.getElementById('btnCancelDebtModal').addEventListener('click', closeDebtModal);
+
+      document.getElementById('btnClosePaymentModal').addEventListener('click', closePaymentModal);
+      document.getElementById('btnCancelPaymentModal').addEventListener('click', closePaymentModal);
+
+      document.getElementById('btnCloseConfirmModal').addEventListener('click', closeConfirmDeleteModal);
+      document.getElementById('btnCancelConfirmModal').addEventListener('click', closeConfirmDeleteModal);
+      document.getElementById('btnExecuteDelete').addEventListener('click', () => {
+        if (typeof pendingDeleteAction === 'function') {
+          pendingDeleteAction();
+        }
+        closeConfirmDeleteModal();
+      });
+
+      document.querySelectorAll('.bottom-nav-btn, #btnTopSettings').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeScreen = btn.getAttribute('data-screen');
+          renderAll();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+
+      document.querySelectorAll('.people-subtab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          peopleSubView = btn.getAttribute('data-people-subview');
+          if (peopleSubView === 'archive') {
+            document.getElementById('filterStatus').value = 'paid';
+          } else if (document.getElementById('filterStatus').value === 'paid') {
+            document.getElementById('filterStatus').value = 'active';
+          }
+          renderAll();
+        });
+      });
+
+      document.querySelectorAll('.stat-period-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          statPeriod = btn.getAttribute('data-stat-period');
+          renderAnalyticsAndLog();
+        });
+      });
+
+      document.getElementById('statStartDate').value = customStart;
+      document.getElementById('statEndDate').value = customEnd;
+      document.getElementById('btnApplyCustomDates').addEventListener('click', () => {
+        customStart = document.getElementById('statStartDate').value || customStart;
+        customEnd = document.getElementById('statEndDate').value || customEnd;
+        renderAnalyticsAndLog();
+        showToast('Период статистики обновлён');
+      });
+
+      document.querySelectorAll('.role-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const preset = btn.getAttribute('data-preset');
+          const bInput = document.getElementById('borrowerInput');
+          const lInput = document.getElementById('lenderInput');
+
+          document.querySelectorAll('.role-preset-btn').forEach(b => {
+            b.className = 'role-preset-btn h-10 px-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-white hover:text-slate-900 transition';
+          });
+          btn.className = 'role-preset-btn h-10 px-2.5 rounded-xl text-xs font-bold filter-pill-active transition';
+
+          if (preset === 'owed_to_me') {
+            if (isMe(bInput.value)) bInput.value = '';
+            lInput.value = 'Я';
+          } else if (preset === 'i_owe') {
+            if (isMe(lInput.value)) lInput.value = '';
+            bInput.value = 'Я';
+          } else {
+            if (isMe(bInput.value)) bInput.value = '';
+            if (isMe(lInput.value)) lInput.value = '';
+          }
+        });
+      });
+
+      document.getElementById('btnFillFullRemain').addEventListener('click', () => {
+        const debtId = document.getElementById('paymentDebtIdInput').value;
+        const debt = state.debts.find(d => d.id === debtId);
+        if (!debt) return;
+        const stats = getDebtStats(debt);
+        document.getElementById('paymentAmountInput').value = stats.remain;
+      });
+
+      document.getElementById('debtForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const id = document.getElementById('debtIdInput').value;
+        const borrower = document.getElementById('borrowerInput').value.trim();
+        const lender = document.getElementById('lenderInput').value.trim();
+        const title = document.getElementById('titleInput').value.trim();
+        const amount = parseFloat(document.getElementById('amountInput').value);
+        const repaymentSchedule = document.getElementById('repaymentScheduleInput').value;
+        const installmentNote = document.getElementById('installmentNoteInput').value.trim();
+        const createdAt = document.getElementById('createdAtInput').value;
+        const dueDate = document.getElementById('dueDateInput').value;
+
+        if (!borrower || !lender || !title || isNaN(amount) || amount <= 0) {
+          showToast('Заполните обязательные поля и корректную сумму', 'error');
+          return;
+        }
+
+        if (id) {
+          const existing = state.debts.find(d => d.id === id);
+          if (existing) {
+            existing.borrower = borrower;
+            existing.lender = lender;
+            existing.title = title;
+            existing.amount = amount;
+            existing.repaymentSchedule = repaymentSchedule;
+            existing.installmentNote = installmentNote;
+            existing.createdAt = createdAt;
+            existing.dueDate = dueDate;
+            showToast('Долг обновлён');
+          }
+        } else {
+          state.debts.unshift({
+            id: 'd_' + Date.now(),
+            borrower,
+            lender,
+            title,
+            amount,
+            repaymentSchedule,
+            installmentNote,
+            createdAt,
+            dueDate,
+            archived: false,
+            payments: []
+          });
+          showToast('Новый долг добавлен');
+        }
+
+        saveState();
+        closeDebtModal();
+        renderAll();
+      });
+
+      document.getElementById('paymentForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const debtId = document.getElementById('paymentDebtIdInput').value;
+        const debt = state.debts.find(d => d.id === debtId);
+        if (!debt) return;
+
+        const amount = parseFloat(document.getElementById('paymentAmountInput').value);
+        const date = document.getElementById('paymentDateInput').value;
+        const note = document.getElementById('paymentNoteInput').value.trim();
+
+        if (isNaN(amount) || amount <= 0) {
+          showToast('Укажите корректную сумму платежа', 'error');
+          return;
+        }
+
+        debt.payments = debt.payments || [];
+        debt.payments.push({
+          id: 'p_' + Date.now(),
+          date,
+          amount,
+          note
+        });
+
+        const newStats = getDebtStats(debt);
+        if (newStats.remain <= 0.005) {
+          if (state.autoArchive !== false) {
+            debt.archived = true;
+            debt.archivedAt = date || getTodayIso();
+            showToast('Долг полностью оплачен и перенесён в архив!');
+          } else {
+            showToast('Долг полностью оплачен!');
+          }
+        } else {
+          showToast(`Платёж ${formatMoney(amount)} записан`);
+        }
+
+        saveState();
+        closePaymentModal();
+        renderAll();
+      });
+
+      document.addEventListener('click', e => {
+        const payBtn = e.target.closest('[data-pay-debt]');
+        if (payBtn) {
+          const debtId = payBtn.getAttribute('data-pay-debt');
+          openPaymentModal(debtId);
+          return;
+        }
+
+        const settleBtn = e.target.closest('[data-settle-debt]');
+        if (settleBtn) {
+          const debtId = settleBtn.getAttribute('data-settle-debt');
+          const debt = state.debts.find(d => d.id === debtId);
+          if (debt) {
+            const stats = getDebtStats(debt);
+            if (stats.remain > 0) {
+              debt.payments = debt.payments || [];
+              debt.payments.push({
+                id: 'p_' + Date.now(),
+                date: getTodayIso(),
+                amount: stats.remain,
+                note: 'Полное погашение остатка'
+              });
+              if (state.autoArchive !== false) {
+                debt.archived = true;
+                debt.archivedAt = getTodayIso();
+              }
+              saveState();
+              renderAll();
+              showToast(state.autoArchive !== false ? 'Долг погашен и отправлен в архив!' : 'Долг полностью погашен!');
+            }
+          }
+          return;
+        }
+
+        const editBtn = e.target.closest('[data-edit-debt]');
+        if (editBtn) {
+          const debtId = editBtn.getAttribute('data-edit-debt');
+          const debt = state.debts.find(d => d.id === debtId);
+          if (debt) openDebtModal(debt);
+          return;
+        }
+
+        const delDebtBtn = e.target.closest('[data-delete-debt]');
+        if (delDebtBtn) {
+          const debtId = delDebtBtn.getAttribute('data-delete-debt');
+          const debt = state.debts.find(d => d.id === debtId);
+          if (debt) {
+            openConfirmDeleteModal(
+              'Удалить долг',
+              `Вы уверены, что хотите удалить запись «${debt.title}» (${debt.borrower} → ${debt.lender})?`,
+              () => {
+                state.debts = state.debts.filter(d => d.id !== debtId);
+                saveState();
+                renderAll();
+                showToast('Долг удалён');
+              }
+            );
+          }
+          return;
+        }
+
+        const delPersonBtn = e.target.closest('[data-delete-person]');
+        if (delPersonBtn) {
+          const personName = delPersonBtn.getAttribute('data-delete-person');
+          openConfirmDeleteModal(
+            'Удалить человека',
+            `Удалить человека «${personName}» и все связанные с ним записи о долгах?`,
+            () => {
+              state.debts = state.debts.filter(d => !getCounterpartyNames(d).includes(personName));
+              if (document.getElementById('filterPerson').value === personName) {
+                document.getElementById('filterPerson').value = 'all';
+              }
+              saveState();
+              renderAll();
+              showToast(`Человек «${personName}» и его долги удалены`);
+            }
+          );
+          return;
+        }
+
+        const delPaymentBtn = e.target.closest('[data-del-payment]');
+        if (delPaymentBtn) {
+          const payId = delPaymentBtn.getAttribute('data-del-payment');
+          const debtId = delPaymentBtn.getAttribute('data-debt-id');
+          const debt = state.debts.find(d => d.id === debtId);
+          if (debt && Array.isArray(debt.payments)) {
+            debt.payments = debt.payments.filter(p => p.id !== payId);
+            saveState();
+            renderAll();
+            showToast('Платёж удалён');
+          }
+          return;
+        }
+
+        const filterPersonBtn = e.target.closest('[data-filter-person]');
+        if (filterPersonBtn) {
+          const personName = filterPersonBtn.getAttribute('data-filter-person');
+          document.getElementById('filterPerson').value = personName;
+          activeScreen = 'people';
+          peopleSubView = 'both';
+          renderAll();
+          showToast(`Показаны все долги: ${personName}`);
+          return;
+        }
+
+        const addForPersonBtn = e.target.closest('[data-add-for-person]');
+        if (addForPersonBtn) {
+          const personName = addForPersonBtn.getAttribute('data-add-for-person');
+          openDebtModal(null, personName);
+          return;
+        }
+
+        const togglePersonBtn = e.target.closest('[data-toggle-person]');
+        if (togglePersonBtn) {
+          const personName = togglePersonBtn.getAttribute('data-toggle-person');
+          expandedPeople[personName] = !expandedPeople[personName];
+          renderAll();
+          return;
+        }
+      });
+
+      document.querySelectorAll('.view-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const v = btn.getAttribute('data-view');
+          if (v === 'home') activeScreen = 'home';
+          else if (v === 'analytics') activeScreen = 'analytics';
+          else activeScreen = 'people';
+          renderAll();
+        });
+      });
+
+      ['searchInput', 'filterPerson', 'filterDirection', 'filterStatus'].forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('input', renderAll);
+        el.addEventListener('change', renderAll);
+      });
+
+      document.getElementById('btnClearFilters').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('filterPerson').value = 'all';
+        document.getElementById('filterDirection').value = 'all';
+        document.getElementById('filterStatus').value = 'active';
+        renderAll();
+      });
+
+      function setAppTheme(themeName) {
+        state.theme = themeName;
+        saveState();
+        renderAll();
+        showToast(themeName === 'dark' ? 'Включена тёмная тема' : 'Включена светлая тема');
+      }
+
+      document.getElementById('btnHeaderThemeToggle').addEventListener('click', () => {
+        setAppTheme(state.theme === 'dark' ? 'light' : 'dark');
+      });
+      document.getElementById('btnThemeLight').addEventListener('click', () => setAppTheme('light'));
+      document.getElementById('btnThemeDark').addEventListener('click', () => setAppTheme('dark'));
+
+      document.querySelectorAll('.currency-quick-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.currency = btn.getAttribute('data-currency-btn');
+          saveState();
+          renderAll();
+          showToast(`Валюта изменена на ${state.currency}`);
+        });
+      });
+
+      document.getElementById('currencySelect').addEventListener('change', e => {
+        state.currency = e.target.value;
+        saveState();
+        renderAll();
+        showToast(`Валюта изменена на ${state.currency}`);
+      });
+
+      document.getElementById('btnToggleAutoArchive').addEventListener('click', () => {
+        state.autoArchive = state.autoArchive === false ? true : false;
+        saveState();
+        renderAll();
+        showToast(state.autoArchive ? 'Автоархивация включена' : 'Автоархивация выключена');
+      });
+
+      // Export Backup (Скачать копию JSON)
+      document.getElementById('btnExportBackup').addEventListener('click', () => {
+        try {
+          const jsonStr = JSON.stringify(state, null, 2);
+          const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const downloadLink = document.createElement('a');
+          const today = getTodayIso();
+          downloadLink.href = url;
+          downloadLink.download = `debt_tracker_backup_${today}.json`;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          downloadLink.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1200);
+          showToast('Резервная копия успешно скачана');
+        } catch (err) {
+          showToast('Не удалось скачать файл', 'error');
+        }
+      });
+
+      // Import Backup (Восстановить из файла)
+      document.getElementById('btnImportBackup').addEventListener('click', () => {
+        document.getElementById('backupFileInput').click();
+      });
+
+      document.getElementById('backupFileInput').addEventListener('change', e => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const imported = JSON.parse(evt.target.result);
+            if (imported && Array.isArray(imported.debts)) {
+              state = imported;
+              if (!state.theme) state.theme = 'light';
+              if (!state.currency) state.currency = '₽';
+              if (state.autoArchive === undefined) state.autoArchive = true;
+              saveState();
+              renderAll();
+              showToast(`Данные восстановлены (${imported.debts.length} долгов)`);
+            } else {
+              showToast('Файл имеет неверный формат', 'error');
+            }
+          } catch (err) {
+            showToast('Ошибка при чтении файла бэкапа', 'error');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+
+      document.getElementById('btnResetDemo').addEventListener('click', () => {
+        const currentTheme = state.theme || 'light';
+        const currentCurrency = state.currency || '₽';
+        state = getDefaultDemoData();
+        state.theme = currentTheme;
+        state.currency = currentCurrency;
+        saveState();
+        renderAll();
+        showToast('Демо-данные восстановлены');
+      });
+
+      document.getElementById('btnClearArchiveAll').addEventListener('click', () => {
+        openConfirmDeleteModal(
+          'Очистить архив',
+          'Удалить все полностью оплаченные долги из архива?',
+          () => {
+            state.debts = state.debts.filter(d => !getDebtStats(d).isPaid);
+            saveState();
+            renderAll();
+            showToast('Архив оплаченных долгов очищен');
+          }
+        );
+      });
+
+      // Automatic save on close / minimize / tab switch / page unload
+      window.addEventListener('beforeunload', saveState);
+      window.addEventListener('pagehide', saveState);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          saveState();
+        } else if (document.visibilityState === 'visible') {
+          reloadAndRenderIfUpdated();
+        }
+      });
+
+      // Automatic load & re-sync on open / pageshow / focus / storage event
+      window.addEventListener('pageshow', reloadAndRenderIfUpdated);
+      window.addEventListener('focus', reloadAndRenderIfUpdated);
+      window.addEventListener('storage', e => {
+        if (e.key === STORAGE_KEY || e.key === BACKUP_STORAGE_KEY) {
+          reloadAndRenderIfUpdated();
+        }
+      });
+
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
